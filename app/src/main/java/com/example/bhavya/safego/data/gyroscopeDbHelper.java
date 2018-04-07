@@ -8,26 +8,26 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by bhavya on 7/4/18.
  */
 
-public class accelerometerDbHelper extends SQLiteOpenHelper{
+public class gyroscopeDbHelper  extends SQLiteOpenHelper {
 
     // The database name
-    private static final String DATABASE_NAME = "acc.db";
+    private static final String DATABASE_NAME = "gyr.db";
 
     // If you change the database schema, you must increment the database version
     private static final int DATABASE_VERSION = 1;
 
     // Constructor
-    public accelerometerDbHelper(Context context) {
+    public gyroscopeDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        final String SQL_CREATE_TABLE = "CREATE TABLE " + accelerometerContract.accelerometer.TABLE_NAME + " (" +
-                accelerometerContract.accelerometer.X+ " FLOAT ," +
-                accelerometerContract.accelerometer.Y + " FLOAT , " +
-                accelerometerContract.accelerometer.Z + " FLOAT , " +
-                accelerometerContract.accelerometer.COLUMN_TIMESTAMP + " STRING " +
+        final String SQL_CREATE_TABLE = "CREATE TABLE " + gyroscopeContract.gyroscope.TABLE_NAME + " (" +
+                gyroscopeContract.gyroscope.X+ " FLOAT ," +
+                gyroscopeContract.gyroscope.Y + " FLOAT , " +
+                gyroscopeContract.gyroscope.Z + " FLOAT , " +
+                gyroscopeContract.gyroscope.COLUMN_TIMESTAMP + " STRING " +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_TABLE);
     }
@@ -38,7 +38,8 @@ public class accelerometerDbHelper extends SQLiteOpenHelper{
         // DATABASE_VERSION the table will be dropped.
         // In a production app, this method might be modified to ALTER the table
         // instead of dropping it, so that existing data is not deleted.
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " +accelerometerContract.accelerometer.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " +gyroscopeContract.gyroscope.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }
+

@@ -33,6 +33,12 @@ import android.widget.TextView;
 
 import com.example.bhavya.safego.data.accelerometerContract;
 import com.example.bhavya.safego.data.accelerometerDbHelper;
+import com.example.bhavya.safego.data.gyroscopeContract;
+import com.example.bhavya.safego.data.gyroscopeDbHelper;
+import com.example.bhavya.safego.data.linearAccelerationContract;
+import com.example.bhavya.safego.data.linearAccelerationDbHelper;
+import com.example.bhavya.safego.data.magnetometerContract;
+import com.example.bhavya.safego.data.magnetometerDbHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -56,11 +62,12 @@ public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
 
     SensorManager mSensorManager;
-    private final static String ip="192.168.1.12";
-    private final static String port="6666";
+    private final static String ip = "192.168.1.12";
+    private final static String port = "6666";
     private String Email;
-    private SQLiteDatabase accDB;
+    private SQLiteDatabase accDB, laDB, magDB, gyrDB;
     private GoogleSignInClient mGoogleSignInClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,18 +100,18 @@ public class LoggedIn extends AppCompatActivity
         if (account != null) {
             if (account.getDisplayName() != null)
                 username.setText(account.getDisplayName());
-        android.net.Uri profileUrl = account.getPhotoUrl();
-        new LoadProfilePic(profilePic).execute(String.valueOf(profileUrl));
+            android.net.Uri profileUrl = account.getPhotoUrl();
+            new LoadProfilePic(profilePic).execute(String.valueOf(profileUrl));
         }
 
-        final Button monitorBtn= findViewById(R.id.monitorBtn);
+        final Button monitorBtn = findViewById(R.id.monitorBtn);
         monitorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 clickMonitor(view);
             }
         });
-        final Button stopMonitorBtn= findViewById(R.id.StopMonitorBtn);
+        final Button stopMonitorBtn = findViewById(R.id.StopMonitorBtn);
         stopMonitorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,32 +119,32 @@ public class LoggedIn extends AppCompatActivity
             }
         });
 
-        TextView u2=findViewById(R.id.username);
-        ImageView pic2=findViewById(R.id.profile_pic);
-        TextView email=findViewById(R.id.email);
+        TextView u2 = findViewById(R.id.username);
+        ImageView pic2 = findViewById(R.id.profile_pic);
+        TextView email = findViewById(R.id.email);
 
         if (account != null) {
             if (account.getDisplayName() != null)
                 u2.setText(account.getDisplayName());
             email.setText(account.getEmail());
-            Email=account.getEmail();
+            Email = account.getEmail();
             android.net.Uri profileUrl = account.getPhotoUrl();
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
-        TextView isUnder18=findViewById(R.id.isUnder18);
-        String IsUnder18=isUnder18(account.getPhotoUrl());
-        if(IsUnder18.equals("1"))
+        TextView isUnder18 = findViewById(R.id.isUnder18);
+        String IsUnder18 = isUnder18(account.getPhotoUrl());
+        if (IsUnder18.equals("1"))
             isUnder18.setVisibility(View.VISIBLE);
         try {
             setProfile();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        final Button updateProfile=findViewById(R.id.update);
+        final Button updateProfile = findViewById(R.id.update);
         updateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("up","updating");
+                Log.i("up", "updating");
                 try {
                     UpdateProfile();
                 } catch (JSONException e) {
@@ -152,13 +159,14 @@ public class LoggedIn extends AppCompatActivity
             }
         });
     }
+
     private String isUnder18(Uri photoUrl) {
         final StringBuffer response = new StringBuffer();
-        Thread thread=new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
-                    URL url = new URL("http://" + ip + ":" + port + "/isUnder18/"+Email);
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/isUnder18/" + Email);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
                     conn.getResponseCode();
@@ -170,9 +178,8 @@ public class LoggedIn extends AppCompatActivity
                     }
                     in.close();
                     conn.disconnect();
-                }catch (Exception e)
-                {
-                    Log.d("error",e.toString());
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
                 }
             }
         });
@@ -182,7 +189,7 @@ public class LoggedIn extends AppCompatActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.i("under18",response.toString());
+        Log.i("under18", response.toString());
         return response.toString();
     }
 
@@ -204,18 +211,18 @@ public class LoggedIn extends AppCompatActivity
     }
 
     private void setProfile() throws JSONException {
-        EditText DLno=findViewById(R.id.DLno);
-        EditText numberPlate=findViewById(R.id.numPlate);
-        EditText gender=findViewById(R.id.gender);
-        EditText phoneNo=findViewById(R.id.phoneno);
-        EditText age=findViewById(R.id.age);
+        EditText DLno = findViewById(R.id.DLno);
+        EditText numberPlate = findViewById(R.id.numPlate);
+        EditText gender = findViewById(R.id.gender);
+        EditText phoneNo = findViewById(R.id.phoneno);
+        EditText age = findViewById(R.id.age);
 
         final StringBuffer response = new StringBuffer();
-        Thread thread=new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
-                    URL url = new URL("http://" + ip + ":" + port + "/profile/"+Email);
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/profile/" + Email);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("GET");
                     conn.getResponseCode();
@@ -227,9 +234,8 @@ public class LoggedIn extends AppCompatActivity
                     }
                     in.close();
                     conn.disconnect();
-                }catch (Exception e)
-                {
-                    Log.d("error",e.toString());
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
                 }
             }
         });
@@ -239,20 +245,21 @@ public class LoggedIn extends AppCompatActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.i("res",response.toString());
+        Log.i("res", response.toString());
         JSONObject obj = new JSONObject(response.toString());
 //        if(!obj.getString("DLno").equals("undefined"))
-            DLno.setText((obj.getString("DLno")));
+        DLno.setText((obj.getString("DLno")));
 //        if(!obj.getString("licencePlateNo").equals("undefined"))
-            numberPlate.setText((obj.getString("licencePlateNo")));
+        numberPlate.setText((obj.getString("licencePlateNo")));
 //        if(!obj.getString("gender").equals("undefined"))
-            gender.setText((obj.getString("gender")));
+        gender.setText((obj.getString("gender")));
 //        if(!obj.getString("phoneNo").equals("undefined"))
-            phoneNo.setText((obj.getString("phoneNo")));
+        phoneNo.setText((obj.getString("phoneNo")));
 //        if(!obj.getString("age").equals("undefined"))
-            age.setText((obj.getString("age")));
+        age.setText((obj.getString("age")));
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -267,12 +274,13 @@ public class LoggedIn extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
     private void signOut() {
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        Intent intent=new Intent(LoggedIn.this,LoggedOut.class);
+                        Intent intent = new Intent(LoggedIn.this, LoggedOut.class);
                         startActivity(intent);
                     }
                 });
@@ -284,12 +292,12 @@ public class LoggedIn extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        LinearLayout home=findViewById(R.id.homeL);
-        LinearLayout monitor=findViewById(R.id.monitorL);
-        LinearLayout see=findViewById(R.id.seeL);
-        LinearLayout distraction=findViewById(R.id.distractionL);
-        LinearLayout report=findViewById(R.id.reportL);
-        LinearLayout reportAgainst=findViewById(R.id.reportAgainstL);
+        LinearLayout home = findViewById(R.id.homeL);
+        LinearLayout monitor = findViewById(R.id.monitorL);
+        LinearLayout see = findViewById(R.id.seeL);
+        LinearLayout distraction = findViewById(R.id.distractionL);
+        LinearLayout report = findViewById(R.id.reportL);
+        LinearLayout reportAgainst = findViewById(R.id.reportAgainstL);
 
         home.setVisibility(View.GONE);
         monitor.setVisibility(View.GONE);
@@ -317,15 +325,20 @@ public class LoggedIn extends AppCompatActivity
         return true;
     }
 
-    private void clickMonitor(View view)
-    {
-        Button stopMonitor= findViewById(R.id.StopMonitorBtn);
+    private void clickMonitor(View view) {
+        Button stopMonitor = findViewById(R.id.StopMonitorBtn);
         stopMonitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
 
-        accelerometerDbHelper dbHelper = new accelerometerDbHelper(this);
-        accDB = dbHelper.getWritableDatabase();
-        Sensor accelerometer=null,linearAcceleration=null,gyroscope=null,magnetometer=null;
+        accelerometerDbHelper AdbHelper = new accelerometerDbHelper(this);
+        accDB = AdbHelper.getWritableDatabase();
+        gyroscopeDbHelper GdbHelper = new gyroscopeDbHelper(this);
+        gyrDB = GdbHelper.getWritableDatabase();
+        magnetometerDbHelper MdbHelper = new magnetometerDbHelper(this);
+        magDB = MdbHelper.getWritableDatabase();
+        linearAccelerationDbHelper LdbHelper = new linearAccelerationDbHelper(this);
+        laDB = LdbHelper.getWritableDatabase();
+        Sensor accelerometer = null, linearAcceleration = null, gyroscope = null, magnetometer = null;
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -334,55 +347,133 @@ public class LoggedIn extends AppCompatActivity
         gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        if(accelerometer!=null)
-            mSensorManager.registerListener(LoggedIn.this,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
-        if(linearAcceleration!=null)
-            mSensorManager.registerListener(LoggedIn.this,linearAcceleration,SensorManager.SENSOR_DELAY_NORMAL);
-        if(gyroscope!=null)
-            mSensorManager.registerListener(LoggedIn.this,gyroscope,SensorManager.SENSOR_DELAY_NORMAL);
-        if(magnetometer!=null)
-            mSensorManager.registerListener(LoggedIn.this,magnetometer,SensorManager.SENSOR_DELAY_NORMAL);
+        if (accelerometer != null)
+            mSensorManager.registerListener(LoggedIn.this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        if (linearAcceleration != null)
+            mSensorManager.registerListener(LoggedIn.this, linearAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
+        if (gyroscope != null)
+            mSensorManager.registerListener(LoggedIn.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        if (magnetometer != null)
+            mSensorManager.registerListener(LoggedIn.this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
-    private void clickStopMonitor(View view)
-    {
-        Button Monitor= findViewById(R.id.monitorBtn);
+
+    private void clickStopMonitor(View view) {
+        Button Monitor = findViewById(R.id.monitorBtn);
         Monitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
         mSensorManager.unregisterListener(LoggedIn.this);
-        Cursor cursor=getAllValuesOfAccelerometer();
-        if (cursor.moveToFirst()){
-            while(!cursor.isAfterLast()){
-                Float x = cursor.getFloat(cursor.getColumnIndex(accelerometerContract.accelerometer.X));
-                Float y = cursor.getFloat(cursor.getColumnIndex(accelerometerContract.accelerometer.Y));
-                Float z = cursor.getFloat(cursor.getColumnIndex(accelerometerContract.accelerometer.Z));
-                String timeStamp= cursor.getString(cursor.getColumnIndex(accelerometerContract.accelerometer.COLUMN_TIMESTAMP));
+        Cursor allACC = getAllValuesOfAccelerometer();
+        Cursor allLA = getAllValuesOfLinearAcceleration();
+        Cursor allMAG = getAllValuesOfMagnetometer();
+        Cursor allGYR = getAllValuesOfGyroscope();
 
-                Log.i("x",String.valueOf(x));
-                Log.i("y",String.valueOf(y));
-                Log.i("z",String.valueOf(z));
-                Log.i("time",timeStamp);
-                cursor.moveToNext();
+        sendAccelerationData(allACC);
+        sendLinearAccelerationData(allLA);
+        sendGyroscopeData(allGYR);
+        sendMagnetometerData(allMAG);
+
+
+        delete();
+    }
+
+    private void sendMagnetometerData(Cursor allMAG) {
+        if (allMAG.moveToFirst()) {
+            while (!allMAG.isAfterLast()) {
+                Float x = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.X));
+                Float y = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Y));
+                Float z = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Z));
+                String timeStamp = allMAG.getString(allMAG.getColumnIndex(magnetometerContract.magnetometer.COLUMN_TIMESTAMP));
+
+                Log.i("mx", String.valueOf(x));
+                Log.i("my", String.valueOf(y));
+                Log.i("mz", String.valueOf(z));
+                Log.i("mtime", timeStamp);
+                allMAG.moveToNext();
             }
         }
-        cursor.close();
-        long del=accDB.delete(accelerometerContract.accelerometer.TABLE_NAME, "1", null);
-        Log.i("del",String.valueOf(del));
+        allMAG.close();
+    }
+
+    private void sendGyroscopeData(Cursor allGYR) {
+        if (allGYR.moveToFirst()) {
+            while (!allGYR.isAfterLast()) {
+                Float x = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.X));
+                Float y = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Y));
+                Float z = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Z));
+                String timeStamp = allGYR.getString(allGYR.getColumnIndex(gyroscopeContract.gyroscope.COLUMN_TIMESTAMP));
+
+                Log.i("gx", String.valueOf(x));
+                Log.i("gy", String.valueOf(y));
+                Log.i("gz", String.valueOf(z));
+                Log.i("gtime", timeStamp);
+                allGYR.moveToNext();
+            }
+        }
+        allGYR.close();
+    }
+
+    private void sendLinearAccelerationData(Cursor allLA) {
+        if (allLA.moveToFirst()) {
+            while (!allLA.isAfterLast()) {
+                Float x = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.X));
+                Float y = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Y));
+                Float z = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Z));
+                String timeStamp = allLA.getString(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP));
+
+                Log.i("lax", String.valueOf(x));
+                Log.i("lay", String.valueOf(y));
+                Log.i("laz", String.valueOf(z));
+                Log.i("latime", timeStamp);
+                allLA.moveToNext();
+            }
+        }
+        allLA.close();
+    }
+
+    private void sendAccelerationData(Cursor allACC) {
+        if (allACC.moveToFirst()) {
+            while (!allACC.isAfterLast()) {
+                Float x = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.X));
+                Float y = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Y));
+                Float z = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Z));
+                String timeStamp = allACC.getString(allACC.getColumnIndex(accelerometerContract.accelerometer.COLUMN_TIMESTAMP));
+
+                Log.i("ax", String.valueOf(x));
+                Log.i("ay", String.valueOf(y));
+                Log.i("az", String.valueOf(z));
+                Log.i("atime", timeStamp);
+                allACC.moveToNext();
+            }
+        }
+        allACC.close();
+    }
+
+    private void delete() {
+        long del = accDB.delete(accelerometerContract.accelerometer.TABLE_NAME, "1", null);
+        Log.i("ACCdel", String.valueOf(del));
+        del = laDB.delete(linearAccelerationContract.linearAcceleration.TABLE_NAME, "1", null);
+        Log.i("LAdel", String.valueOf(del));
+        del = magDB.delete(magnetometerContract.magnetometer.TABLE_NAME, "1", null);
+        Log.i("MAGdel", String.valueOf(del));
+        del = gyrDB.delete(gyroscopeContract.gyroscope.TABLE_NAME, "1", null);
+        Log.i("GYRdel", String.valueOf(del));
 
     }
-    private void UpdateProfile() throws JSONException {
-        EditText DLno=findViewById(R.id.DLno);
-        EditText numberPlate=findViewById(R.id.numPlate);
-        EditText gender=findViewById(R.id.gender);
-        EditText phoneNo=findViewById(R.id.phoneno);
-        EditText age=findViewById(R.id.age);
 
-        final StringBuffer response=new StringBuffer();
-        final String json = "{\"DLno\":\"" + DLno.getText() + "\",\"licencePlateNo\":\""+numberPlate.getText()+"\",\"gender\":\""+ gender.getText()+"\",\"age\":\""+age.getText()+"\",\"phoneNo\":\""+phoneNo.getText()+"\",\"email\":\""+Email+"\"}";
+    private void UpdateProfile() throws JSONException {
+        EditText DLno = findViewById(R.id.DLno);
+        EditText numberPlate = findViewById(R.id.numPlate);
+        EditText gender = findViewById(R.id.gender);
+        EditText phoneNo = findViewById(R.id.phoneno);
+        EditText age = findViewById(R.id.age);
+
+        final StringBuffer response = new StringBuffer();
+        final String json = "{\"DLno\":\"" + DLno.getText() + "\",\"licencePlateNo\":\"" + numberPlate.getText() + "\",\"gender\":\"" + gender.getText() + "\",\"age\":\"" + age.getText() + "\",\"phoneNo\":\"" + phoneNo.getText() + "\",\"email\":\"" + Email + "\"}";
         final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://"+ip+":"+port+"/update");
+                    URL url = new URL("http://" + ip + ":" + port + "/update");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setDoOutput(true);
                     conn.setRequestMethod("POST");
@@ -402,9 +493,9 @@ public class LoggedIn extends AppCompatActivity
                     in.close();
                     conn.disconnect();
 
-                }catch (Exception e){
+                } catch (Exception e) {
                     //error occured
-                    Log.d("error",e.toString());
+                    Log.d("error", e.toString());
                 }
             }
         });
@@ -414,47 +505,104 @@ public class LoggedIn extends AppCompatActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if(response.toString().equals("done")) {
-          setProfile();
+        if (response.toString().equals("done")) {
+            setProfile();
         }
 
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER) {
-           long temp= insertAccValues(event.values[0],event.values[1],event.values[2]);
-            Log.i("insert",String.valueOf(temp));
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            long temp = insertAccValues(event.values[0], event.values[1], event.values[2]);
+            Log.i("insertACC", String.valueOf(temp));
         }
-        if(event.sensor.getType()==Sensor.TYPE_LINEAR_ACCELERATION) {
+        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+            long temp = insertLAValues(event.values[0], event.values[1], event.values[2]);
+            Log.i("insertLA", String.valueOf(temp));
         }
-        if(event.sensor.getType()==Sensor.TYPE_MAGNETIC_FIELD) {
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            long temp = insertMagValues(event.values[0], event.values[1], event.values[2]);
+            Log.i("insertMAG", String.valueOf(temp));
+        }
+        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            long temp = insertGyrValues(event.values[0], event.values[1], event.values[2]);
+            Log.i("insertGYR", String.valueOf(temp));
+        }
 
-        }
-        if(event.sensor.getType()==Sensor.TYPE_GYROSCOPE) {
-
-        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
-    public long insertAccValues(float x,float y,float z)
-    {
+
+    public long insertLAValues(float x, float y, float z) {
+        ContentValues cv = new ContentValues();
+        cv.put(linearAccelerationContract.linearAcceleration.X, x);
+        cv.put(linearAccelerationContract.linearAcceleration.Y, y);
+        cv.put(linearAccelerationContract.linearAcceleration.Z, z);
+
+        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
+        Date date = new Date();
+        cv.put(linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP, String.valueOf(date));
+
+        return (laDB.insert(linearAccelerationContract.linearAcceleration.TABLE_NAME, null, cv));
+    }
+
+    public long insertMagValues(float x, float y, float z) {
+        ContentValues cv = new ContentValues();
+        cv.put(magnetometerContract.magnetometer.X, x);
+        cv.put(magnetometerContract.magnetometer.Y, y);
+        cv.put(magnetometerContract.magnetometer.Z, z);
+
+        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
+        Date date = new Date();
+        cv.put(magnetometerContract.magnetometer.COLUMN_TIMESTAMP, String.valueOf(date));
+
+        return (magDB.insert(magnetometerContract.magnetometer.TABLE_NAME, null, cv));
+    }
+
+    public long insertGyrValues(float x, float y, float z) {
+        ContentValues cv = new ContentValues();
+        cv.put(gyroscopeContract.gyroscope.X, x);
+        cv.put(gyroscopeContract.gyroscope.Y, y);
+        cv.put(gyroscopeContract.gyroscope.Z, z);
+
+        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
+        Date date = new Date();
+        cv.put(gyroscopeContract.gyroscope.COLUMN_TIMESTAMP, String.valueOf(date));
+
+        return (gyrDB.insert(gyroscopeContract.gyroscope.TABLE_NAME, null, cv));
+    }
+
+    public long insertAccValues(float x, float y, float z) {
         ContentValues cv = new ContentValues();
         cv.put(accelerometerContract.accelerometer.X, x);
         cv.put(accelerometerContract.accelerometer.Y, y);
         cv.put(accelerometerContract.accelerometer.Z, z);
 
         //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
-        Date date=new Date();
+        Date date = new Date();
         cv.put(accelerometerContract.accelerometer.COLUMN_TIMESTAMP, String.valueOf(date));
 
         return (accDB.insert(accelerometerContract.accelerometer.TABLE_NAME, null, cv));
     }
-    public Cursor getAllValuesOfAccelerometer(){
-        return  accDB.query(accelerometerContract.accelerometer.TABLE_NAME,new String[] {accelerometerContract.accelerometer.X,accelerometerContract.accelerometer.Y,accelerometerContract.accelerometer.Z,accelerometerContract.accelerometer.COLUMN_TIMESTAMP},null,null,null,null,null,null);
+
+    public Cursor getAllValuesOfAccelerometer() {
+        return accDB.query(accelerometerContract.accelerometer.TABLE_NAME, new String[]{accelerometerContract.accelerometer.X, accelerometerContract.accelerometer.Y, accelerometerContract.accelerometer.Z, accelerometerContract.accelerometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+    }
+
+    public Cursor getAllValuesOfLinearAcceleration() {
+        return laDB.query(linearAccelerationContract.linearAcceleration.TABLE_NAME, new String[]{linearAccelerationContract.linearAcceleration.X, linearAccelerationContract.linearAcceleration.Y, linearAccelerationContract.linearAcceleration.Z, linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+    }
+
+    public Cursor getAllValuesOfMagnetometer() {
+        return magDB.query(magnetometerContract.magnetometer.TABLE_NAME, new String[]{magnetometerContract.magnetometer.X, magnetometerContract.magnetometer.Y, magnetometerContract.magnetometer.Z, magnetometerContract.magnetometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+    }
+
+    public Cursor getAllValuesOfGyroscope() {
+        return gyrDB.query(gyroscopeContract.gyroscope.TABLE_NAME, new String[]{gyroscopeContract.gyroscope.X, gyroscopeContract.gyroscope.Y, gyroscopeContract.gyroscope.Z, gyroscopeContract.gyroscope.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
     }
 
 }
