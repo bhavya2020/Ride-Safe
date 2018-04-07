@@ -9,8 +9,13 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.bhavya.safego.LoggedIn"
     tools:showIn="@layout/app_bar_logged_in">
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <!--home-->
     <LinearLayout
+        android:id="@+id/homeL"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -197,8 +202,78 @@ android:background="@android:color/transparent"
             android:text="UPDATE PROFILE"
             android:textSize="20sp"
             android:layout_margin="20dp"/>
-
-
     </LinearLayout>
-
+    <!--monitor-->
+    <LinearLayout
+        android:id="@+id/monitorL"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:id="@+id/monitorBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:textSize="40dp"
+            android:text="MONITOR"
+            android:textColor="@android:color/background_light"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"/>
+        <Button
+            android:id="@+id/StopMonitorBtn"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:textSize="40dp"
+            android:text=" STOP MONITOR"
+            android:textColor="@android:color/background_light"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+    <!--distraction-->
+    <LinearLayout
+        android:id="@+id/distractionL"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="distraction"/>
+    </LinearLayout>
+    <!--see-->
+    <LinearLayout
+        android:id="@+id/seeL"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="see"/>
+    </LinearLayout>
+    <!--report against-->
+    <LinearLayout
+        android:id="@+id/reportAgainstL"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reportAgainst"/>
+    </LinearLayout>
+    <!--report-->
+    <LinearLayout
+        android:id="@+id/reportL"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="report"/>
+    </LinearLayout>
+</LinearLayout>
 </ScrollView>
