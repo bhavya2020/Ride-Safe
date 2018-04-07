@@ -65,19 +65,18 @@ import java.util.Date;
 public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    Boolean isMonitoring=false;
+    Boolean isMonitoring = false;
 
     private SharedPreferences mPrefs;
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.i("start","starting activity");
+        Log.i("start", "starting activity");
         final Button monitorBtn = findViewById(R.id.monitorBtn);
         final Button stopMonitorBtn = findViewById(R.id.StopMonitorBtn);
 
-        if(isMonitoring)
-        {
+        if (isMonitoring) {
             monitorBtn.setVisibility(View.GONE);
             stopMonitorBtn.setVisibility(View.VISIBLE);
         }
@@ -86,13 +85,13 @@ public class LoggedIn extends AppCompatActivity
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.i("restart","restarting activity");
+        Log.i("restart", "restarting activity");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i("stop","stopping activity");
+        Log.i("stop", "stopping activity");
 
     }
 
@@ -100,7 +99,7 @@ public class LoggedIn extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean("isMonitoring",isMonitoring);
+        ed.putBoolean("isMonitoring", isMonitoring);
         ed.apply();
 
     }
@@ -108,17 +107,17 @@ public class LoggedIn extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("resume","resuming activity");
+        Log.i("resume", "resuming activity");
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i("destroy","destroying activity");
+        Log.i("destroy", "destroying activity");
     }
 
-    private final static String ip = "192.168.1.12";
+    private final static String ip = "192.168.1.6";
     private final static String port = "6666";
     private String Email;
     private SQLiteDatabase accDB, laDB, magDB, gyrDB;
@@ -128,10 +127,10 @@ public class LoggedIn extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
-        Log.i("create","creating activity");
+        Log.i("create", "creating activity");
 
-         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        isMonitoring = mPrefs.getBoolean("isMonitoring",false);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        isMonitoring = mPrefs.getBoolean("isMonitoring", false);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -179,8 +178,7 @@ public class LoggedIn extends AppCompatActivity
             }
         });
 
-        if(isMonitoring)
-        {
+        if (isMonitoring) {
             monitorBtn.setVisibility(View.GONE);
             stopMonitorBtn.setVisibility(View.VISIBLE);
         }
@@ -392,129 +390,22 @@ public class LoggedIn extends AppCompatActivity
     }
 
     private void clickMonitor(View view) {
-        isMonitoring=true;
+        isMonitoring = true;
         Button stopMonitor = findViewById(R.id.StopMonitorBtn);
         stopMonitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         startService(service);
-
     }
 
     private void clickStopMonitor(View view) {
-        isMonitoring=false;
+        isMonitoring = false;
         Button Monitor = findViewById(R.id.monitorBtn);
         Monitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         stopService(service);
-
-        if(accDB==null) {
-            accelerometerDbHelper AdbHelper = new accelerometerDbHelper(this);
-            accDB = AdbHelper.getWritableDatabase();
-            gyroscopeDbHelper GdbHelper = new gyroscopeDbHelper(this);
-            gyrDB = GdbHelper.getWritableDatabase();
-            magnetometerDbHelper MdbHelper = new magnetometerDbHelper(this);
-            magDB = MdbHelper.getWritableDatabase();
-            linearAccelerationDbHelper LdbHelper = new linearAccelerationDbHelper(this);
-            laDB = LdbHelper.getWritableDatabase();
-        }
-        Cursor allACC = getAllValuesOfAccelerometer();
-        Cursor allLA = getAllValuesOfLinearAcceleration();
-        Cursor allMAG = getAllValuesOfMagnetometer();
-        Cursor allGYR = getAllValuesOfGyroscope();
-
-        sendAccelerationData(allACC);
-        sendLinearAccelerationData(allLA);
-        sendGyroscopeData(allGYR);
-        sendMagnetometerData(allMAG);
-
-
-        delete();
-    }
-
-    private void sendMagnetometerData(Cursor allMAG) {
-        if (allMAG.moveToFirst()) {
-            while (!allMAG.isAfterLast()) {
-                Float x = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.X));
-                Float y = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Y));
-                Float z = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Z));
-                String timeStamp = allMAG.getString(allMAG.getColumnIndex(magnetometerContract.magnetometer.COLUMN_TIMESTAMP));
-
-                Log.i("mx", String.valueOf(x));
-                Log.i("my", String.valueOf(y));
-                Log.i("mz", String.valueOf(z));
-                Log.i("mtime", timeStamp);
-                allMAG.moveToNext();
-            }
-        }
-        allMAG.close();
-    }
-
-    private void sendGyroscopeData(Cursor allGYR) {
-        if (allGYR.moveToFirst()) {
-            while (!allGYR.isAfterLast()) {
-                Float x = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.X));
-                Float y = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Y));
-                Float z = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Z));
-                String timeStamp = allGYR.getString(allGYR.getColumnIndex(gyroscopeContract.gyroscope.COLUMN_TIMESTAMP));
-
-                Log.i("gx", String.valueOf(x));
-                Log.i("gy", String.valueOf(y));
-                Log.i("gz", String.valueOf(z));
-                Log.i("gtime", timeStamp);
-                allGYR.moveToNext();
-            }
-        }
-        allGYR.close();
-    }
-
-    private void sendLinearAccelerationData(Cursor allLA) {
-        if (allLA.moveToFirst()) {
-            while (!allLA.isAfterLast()) {
-                Float x = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.X));
-                Float y = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Y));
-                Float z = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Z));
-                String timeStamp = allLA.getString(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP));
-
-                Log.i("lax", String.valueOf(x));
-                Log.i("lay", String.valueOf(y));
-                Log.i("laz", String.valueOf(z));
-                Log.i("latime", timeStamp);
-                allLA.moveToNext();
-            }
-        }
-        allLA.close();
-    }
-
-    private void sendAccelerationData(Cursor allACC) {
-        if (allACC.moveToFirst()) {
-            while (!allACC.isAfterLast()) {
-                Float x = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.X));
-                Float y = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Y));
-                Float z = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Z));
-                String timeStamp = allACC.getString(allACC.getColumnIndex(accelerometerContract.accelerometer.COLUMN_TIMESTAMP));
-
-                Log.i("ax", String.valueOf(x));
-                Log.i("ay", String.valueOf(y));
-                Log.i("az", String.valueOf(z));
-                Log.i("atime", timeStamp);
-                allACC.moveToNext();
-            }
-        }
-        allACC.close();
-    }
-
-    private void delete() {
-        long del = accDB.delete(accelerometerContract.accelerometer.TABLE_NAME, "1", null);
-        Log.i("ACCdel", String.valueOf(del));
-        del = laDB.delete(linearAccelerationContract.linearAcceleration.TABLE_NAME, "1", null);
-        Log.i("LAdel", String.valueOf(del));
-        del = magDB.delete(magnetometerContract.magnetometer.TABLE_NAME, "1", null);
-        Log.i("MAGdel", String.valueOf(del));
-        del = gyrDB.delete(gyroscopeContract.gyroscope.TABLE_NAME, "1", null);
-        Log.i("GYRdel", String.valueOf(del));
-
+        new stopMonitor(Email, this).execute();
     }
 
     private void UpdateProfile() throws JSONException {
@@ -567,25 +458,4 @@ public class LoggedIn extends AppCompatActivity
         }
 
     }
-
-
-
-
-
-    public Cursor getAllValuesOfAccelerometer() {
-        return accDB.query(accelerometerContract.accelerometer.TABLE_NAME, new String[]{accelerometerContract.accelerometer.X, accelerometerContract.accelerometer.Y, accelerometerContract.accelerometer.Z, accelerometerContract.accelerometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
-    }
-
-    public Cursor getAllValuesOfLinearAcceleration() {
-        return laDB.query(linearAccelerationContract.linearAcceleration.TABLE_NAME, new String[]{linearAccelerationContract.linearAcceleration.X, linearAccelerationContract.linearAcceleration.Y, linearAccelerationContract.linearAcceleration.Z, linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
-    }
-
-    public Cursor getAllValuesOfMagnetometer() {
-        return magDB.query(magnetometerContract.magnetometer.TABLE_NAME, new String[]{magnetometerContract.magnetometer.X, magnetometerContract.magnetometer.Y, magnetometerContract.magnetometer.Z, magnetometerContract.magnetometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
-    }
-
-    public Cursor getAllValuesOfGyroscope() {
-        return gyrDB.query(gyroscopeContract.gyroscope.TABLE_NAME, new String[]{gyroscopeContract.gyroscope.X, gyroscopeContract.gyroscope.Y, gyroscopeContract.gyroscope.Z, gyroscopeContract.gyroscope.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
-    }
-
 }

@@ -31,7 +31,7 @@ import java.net.URL;
 
 public class LoggedOut extends AppCompatActivity {
 
-    private final static String ip="192.168.1.12";
+    private final static String ip="192.168.1.6";
     private final static String port="6666";
     private final static int RC_SIGN_IN=900;
     private GoogleSignInClient mGoogleSignInClient;
