@@ -20,10 +20,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Override
-    protected void onStart() {
-        super.onStart();
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if(account==null)
         {
@@ -36,12 +37,5 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("account",account);
             startActivity(intent);
         }
-
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
     }
 }

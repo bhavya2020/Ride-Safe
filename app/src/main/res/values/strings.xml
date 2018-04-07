@@ -4,6 +4,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="clientId">1085918584781-3b1h1so80rlcp2bgketn7r8bsbjn9a2t.apps.googleusercontent.com</string>
+    <string name="ip">192.168.1.12</string>
+    <string name="port">6666</string>
     <string name="clientSecret">4ZXGOkkzCxONF59etq7Crc73</string>
     <string name="action_settings">Settings</string>
 </resources>
