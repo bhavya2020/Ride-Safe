@@ -3,6 +3,7 @@ package com.example.bhavya.safego;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
@@ -10,7 +11,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -59,9 +63,61 @@ import java.net.URL;
 import java.util.Date;
 
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
-    SensorManager mSensorManager;
+    Boolean isMonitoring=false;
+
+    private SharedPreferences mPrefs;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("start","starting activity");
+        final Button monitorBtn = findViewById(R.id.monitorBtn);
+        final Button stopMonitorBtn = findViewById(R.id.StopMonitorBtn);
+
+        if(isMonitoring)
+        {
+            monitorBtn.setVisibility(View.GONE);
+            stopMonitorBtn.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.i("restart","restarting activity");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i("stop","stopping activity");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putBoolean("isMonitoring",isMonitoring);
+        ed.apply();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("resume","resuming activity");
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("destroy","destroying activity");
+    }
+
     private final static String ip = "192.168.1.12";
     private final static String port = "6666";
     private String Email;
@@ -72,6 +128,10 @@ public class LoggedIn extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
+        Log.i("create","creating activity");
+
+         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        isMonitoring = mPrefs.getBoolean("isMonitoring",false);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -118,6 +178,12 @@ public class LoggedIn extends AppCompatActivity
                 clickStopMonitor(view);
             }
         });
+
+        if(isMonitoring)
+        {
+            monitorBtn.setVisibility(View.GONE);
+            stopMonitorBtn.setVisibility(View.VISIBLE);
+        }
 
         TextView u2 = findViewById(R.id.username);
         ImageView pic2 = findViewById(R.id.profile_pic);
@@ -326,42 +392,33 @@ public class LoggedIn extends AppCompatActivity
     }
 
     private void clickMonitor(View view) {
+        isMonitoring=true;
         Button stopMonitor = findViewById(R.id.StopMonitorBtn);
         stopMonitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
+        Intent service = new Intent(getBaseContext(), startMonitorService.class);
+        startService(service);
 
-        accelerometerDbHelper AdbHelper = new accelerometerDbHelper(this);
-        accDB = AdbHelper.getWritableDatabase();
-        gyroscopeDbHelper GdbHelper = new gyroscopeDbHelper(this);
-        gyrDB = GdbHelper.getWritableDatabase();
-        magnetometerDbHelper MdbHelper = new magnetometerDbHelper(this);
-        magDB = MdbHelper.getWritableDatabase();
-        linearAccelerationDbHelper LdbHelper = new linearAccelerationDbHelper(this);
-        laDB = LdbHelper.getWritableDatabase();
-        Sensor accelerometer = null, linearAcceleration = null, gyroscope = null, magnetometer = null;
-
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        linearAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-        gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-        if (accelerometer != null)
-            mSensorManager.registerListener(LoggedIn.this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        if (linearAcceleration != null)
-            mSensorManager.registerListener(LoggedIn.this, linearAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
-        if (gyroscope != null)
-            mSensorManager.registerListener(LoggedIn.this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        if (magnetometer != null)
-            mSensorManager.registerListener(LoggedIn.this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void clickStopMonitor(View view) {
+        isMonitoring=false;
         Button Monitor = findViewById(R.id.monitorBtn);
         Monitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
-        mSensorManager.unregisterListener(LoggedIn.this);
+        Intent service = new Intent(getBaseContext(), startMonitorService.class);
+        stopService(service);
+
+        if(accDB==null) {
+            accelerometerDbHelper AdbHelper = new accelerometerDbHelper(this);
+            accDB = AdbHelper.getWritableDatabase();
+            gyroscopeDbHelper GdbHelper = new gyroscopeDbHelper(this);
+            gyrDB = GdbHelper.getWritableDatabase();
+            magnetometerDbHelper MdbHelper = new magnetometerDbHelper(this);
+            magDB = MdbHelper.getWritableDatabase();
+            linearAccelerationDbHelper LdbHelper = new linearAccelerationDbHelper(this);
+            laDB = LdbHelper.getWritableDatabase();
+        }
         Cursor allACC = getAllValuesOfAccelerometer();
         Cursor allLA = getAllValuesOfLinearAcceleration();
         Cursor allMAG = getAllValuesOfMagnetometer();
@@ -511,83 +568,9 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            long temp = insertAccValues(event.values[0], event.values[1], event.values[2]);
-            Log.i("insertACC", String.valueOf(temp));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            long temp = insertLAValues(event.values[0], event.values[1], event.values[2]);
-            Log.i("insertLA", String.valueOf(temp));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            long temp = insertMagValues(event.values[0], event.values[1], event.values[2]);
-            Log.i("insertMAG", String.valueOf(temp));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            long temp = insertGyrValues(event.values[0], event.values[1], event.values[2]);
-            Log.i("insertGYR", String.valueOf(temp));
-        }
 
-    }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
 
-    }
-
-    public long insertLAValues(float x, float y, float z) {
-        ContentValues cv = new ContentValues();
-        cv.put(linearAccelerationContract.linearAcceleration.X, x);
-        cv.put(linearAccelerationContract.linearAcceleration.Y, y);
-        cv.put(linearAccelerationContract.linearAcceleration.Z, z);
-
-        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
-        Date date = new Date();
-        cv.put(linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP, String.valueOf(date));
-
-        return (laDB.insert(linearAccelerationContract.linearAcceleration.TABLE_NAME, null, cv));
-    }
-
-    public long insertMagValues(float x, float y, float z) {
-        ContentValues cv = new ContentValues();
-        cv.put(magnetometerContract.magnetometer.X, x);
-        cv.put(magnetometerContract.magnetometer.Y, y);
-        cv.put(magnetometerContract.magnetometer.Z, z);
-
-        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
-        Date date = new Date();
-        cv.put(magnetometerContract.magnetometer.COLUMN_TIMESTAMP, String.valueOf(date));
-
-        return (magDB.insert(magnetometerContract.magnetometer.TABLE_NAME, null, cv));
-    }
-
-    public long insertGyrValues(float x, float y, float z) {
-        ContentValues cv = new ContentValues();
-        cv.put(gyroscopeContract.gyroscope.X, x);
-        cv.put(gyroscopeContract.gyroscope.Y, y);
-        cv.put(gyroscopeContract.gyroscope.Z, z);
-
-        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
-        Date date = new Date();
-        cv.put(gyroscopeContract.gyroscope.COLUMN_TIMESTAMP, String.valueOf(date));
-
-        return (gyrDB.insert(gyroscopeContract.gyroscope.TABLE_NAME, null, cv));
-    }
-
-    public long insertAccValues(float x, float y, float z) {
-        ContentValues cv = new ContentValues();
-        cv.put(accelerometerContract.accelerometer.X, x);
-        cv.put(accelerometerContract.accelerometer.Y, y);
-        cv.put(accelerometerContract.accelerometer.Z, z);
-
-        //  DateFormat df=new SimpleDateFormat("mm-dd hh:mm:ss");
-        Date date = new Date();
-        cv.put(accelerometerContract.accelerometer.COLUMN_TIMESTAMP, String.valueOf(date));
-
-        return (accDB.insert(accelerometerContract.accelerometer.TABLE_NAME, null, cv));
-    }
 
     public Cursor getAllValuesOfAccelerometer() {
         return accDB.query(accelerometerContract.accelerometer.TABLE_NAME, new String[]{accelerometerContract.accelerometer.X, accelerometerContract.accelerometer.Y, accelerometerContract.accelerometer.Z, accelerometerContract.accelerometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);

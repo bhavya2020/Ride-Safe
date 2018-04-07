@@ -23,7 +23,7 @@
         </activity>
         <activity android:name=".LoggedOut">
             </activity>
-
+        <service android:name=".startMonitorService"/>
     </application>
 
 </manifest>
