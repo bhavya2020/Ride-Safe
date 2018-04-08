@@ -30,10 +30,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.bhavya.safego.data.accelerometerContract;
 import com.example.bhavya.safego.data.accelerometerDbHelper;
@@ -216,12 +218,92 @@ public class LoggedIn extends AppCompatActivity
                 }
             }
         });
+        Button reportButton= findViewById(R.id.reportBtn);
+        final EditText reportLicencePlate=findViewById(R.id.ReportLicencePlateNo);
+        final  CheckBox categories[]=new CheckBox[6];
+        categories[0]=findViewById(R.id.suddenBreaks);
+        categories[1]=findViewById(R.id.wrongSide);
+        categories[2]=findViewById(R.id.inappropriateParking);
+        categories[3]=findViewById(R.id.sharpTurn);
+        categories[4]=findViewById(R.id.blockingTheRoad);
+        categories[5]=findViewById(R.id.overtakingFromLeft);
+
+        final boolean categoriesToReport[]=new boolean[6];
+
+        reportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for(int i=0;i<6;i++)
+                {
+                    categoriesToReport[i]=categories[i].isChecked();
+                    categories[i].setChecked(false);
+                }
+                report(reportLicencePlate.getText().toString(),categoriesToReport);
+                reportLicencePlate.setText("");
+
+            }
+        });
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 signOut();
             }
         });
+    }
+
+    private void report(String licencePlate, boolean[] categoriesToReport) {
+
+        final StringBuffer response=new StringBuffer();
+        String json = "{\"reporterID\":\"" + Email +  "\",\"plateNo\":\""+licencePlate+"\"";
+        for(int i=0;i<6;i++)
+        {
+            json=json.concat(",\"category"+i+"\":\""+categoriesToReport[i]+"\"");
+        }
+        final String JSON=json.concat("}");
+        Log.i("json",JSON);
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://"+ip+":"+port+"/report");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setDoOutput(true);
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    OutputStream os;
+                    os = conn.getOutputStream();
+                    os.write(JSON.getBytes());
+                    os.flush();
+                    os.close();
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+
+                }catch (Exception e){
+                    //error occured
+                    Log.d("error",e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if(response.toString().equals("done")) {
+            Toast.makeText(this,"reported successfully",Toast.LENGTH_LONG).show();
+        }
+
+
+
     }
 
     private String isUnder18(Uri photoUrl) {

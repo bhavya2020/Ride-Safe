@@ -269,11 +269,87 @@ android:background="@android:color/transparent"
         android:id="@+id/reportL"
         android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="30sp"
+            android:layout_margin="10dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Report an offence"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="report"/>
+            android:textSize="15sp"
+            android:layout_marginLeft="10dp"
+            android:textColor="@color/colorAccent"
+            android:text="Enter the Licence Plate No: "
+            android:labelFor="@+id/ReportLicencePlateNo"/>
+        <EditText
+            android:inputType="text"
+            android:layout_margin="10dp"
+            android:id="@+id/ReportLicencePlateNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:layout_margin="10dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Report on any of the following categories: "
+            />
+        <CheckBox
+            android:id="@+id/suddenBreaks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Sudden breaks"/>
+        <CheckBox
+            android:id="@+id/wrongSide"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Wrong side"/>
+        <CheckBox
+            android:id="@+id/inappropriateParking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Inappropriate Parking"/>
+        <CheckBox
+            android:id="@+id/sharpTurn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="sharp Turn"/>
+        <CheckBox
+            android:id="@+id/blockingTheRoad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Blocking The Road"/>
+        <CheckBox
+            android:id="@+id/overtakingFromLeft"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Overtaking From Left"/>
+
+        <Button
+            android:id="@+id/reportBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:text="REPORT"
+            android:textColor="@android:color/background_light"
+            android:gravity="center"
+            android:background="@color/colorPrimaryDark"
+            android:layout_margin="10dp"/>
+
     </LinearLayout>
 </LinearLayout>
 </ScrollView>
