@@ -25,13 +25,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="30sp"
-            android:padding="10dp"
-            android:layout_marginTop="20dp"
+            android:padding="2dp"
+            android:layout_marginTop="10dp"
             android:text="Be Careful you seem to be under 18!!"
             android:gravity="center"
             android:textColor="@android:color/holo_red_dark"
             android:visibility="gone"
             />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorPrimaryDark"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,6 +45,10 @@
         android:textAlignment="center"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="30sp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorPrimaryDark"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -81,6 +89,11 @@
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_margin="1dp"
+            android:background="@color/colorPrimaryDark"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -207,6 +220,7 @@ android:background="@android:color/transparent"
     <LinearLayout
         android:id="@+id/monitorL"
         android:visibility="gone"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <Button
@@ -230,6 +244,10 @@ android:background="@android:color/transparent"
             android:textColor="@android:color/background_light"
             android:layout_margin="10dp"
             android:layout_gravity="center"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorPrimaryDark"/>
     </LinearLayout>
     <!--distraction-->
     <LinearLayout
@@ -258,11 +276,31 @@ android:background="@android:color/transparent"
         android:id="@+id/reportAgainstL"
         android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/colorPrimaryDark"/>
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="reportAgainst"/>
+            android:gravity="center"
+            android:textSize="30sp"
+            android:textColor="@color/colorPrimaryDark"
+            android:padding="10dp"
+            android:text="Reports Against You"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorPrimaryDark"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_reports"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </android.support.v7.widget.RecyclerView>
     </LinearLayout>
     <!--report-->
     <LinearLayout
@@ -271,6 +309,11 @@ android:background="@android:color/transparent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="5dp"
+            android:background="@color/colorPrimaryDark"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -279,6 +322,11 @@ android:background="@android:color/transparent"
             android:layout_margin="10dp"
             android:textColor="@color/colorPrimaryDark"
             android:text="Report an offence"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@color/colorPrimaryDark"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

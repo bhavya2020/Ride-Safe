@@ -18,6 +18,9 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
 import android.util.Log;
 import android.view.View;
@@ -52,6 +55,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
@@ -68,6 +72,8 @@ public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     Boolean isMonitoring = false;
+    private reportsAdapter mAdapter;
+    private RecyclerView mRecyclerView;
 
     private SharedPreferences mPrefs;
 
@@ -218,27 +224,26 @@ public class LoggedIn extends AppCompatActivity
                 }
             }
         });
-        Button reportButton= findViewById(R.id.reportBtn);
-        final EditText reportLicencePlate=findViewById(R.id.ReportLicencePlateNo);
-        final  CheckBox categories[]=new CheckBox[6];
-        categories[0]=findViewById(R.id.suddenBreaks);
-        categories[1]=findViewById(R.id.wrongSide);
-        categories[2]=findViewById(R.id.inappropriateParking);
-        categories[3]=findViewById(R.id.sharpTurn);
-        categories[4]=findViewById(R.id.blockingTheRoad);
-        categories[5]=findViewById(R.id.overtakingFromLeft);
+        Button reportButton = findViewById(R.id.reportBtn);
+        final EditText reportLicencePlate = findViewById(R.id.ReportLicencePlateNo);
+        final CheckBox categories[] = new CheckBox[6];
+        categories[0] = findViewById(R.id.suddenBreaks);
+        categories[1] = findViewById(R.id.wrongSide);
+        categories[2] = findViewById(R.id.inappropriateParking);
+        categories[3] = findViewById(R.id.sharpTurn);
+        categories[4] = findViewById(R.id.blockingTheRoad);
+        categories[5] = findViewById(R.id.overtakingFromLeft);
 
-        final boolean categoriesToReport[]=new boolean[6];
+        final boolean categoriesToReport[] = new boolean[6];
 
         reportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for(int i=0;i<6;i++)
-                {
-                    categoriesToReport[i]=categories[i].isChecked();
+                for (int i = 0; i < 6; i++) {
+                    categoriesToReport[i] = categories[i].isChecked();
                     categories[i].setChecked(false);
                 }
-                report(reportLicencePlate.getText().toString(),categoriesToReport);
+                report(reportLicencePlate.getText().toString(), categoriesToReport);
                 reportLicencePlate.setText("");
 
             }
@@ -251,21 +256,20 @@ public class LoggedIn extends AppCompatActivity
         });
     }
 
-    private void report(String licencePlate, boolean[] categoriesToReport) {
+    private void report(String licencePlate, boolean[] categoriesToReport)  {
 
-        final StringBuffer response=new StringBuffer();
-        String json = "{\"reporterID\":\"" + Email +  "\",\"plateNo\":\""+licencePlate+"\"";
-        for(int i=0;i<6;i++)
-        {
-            json=json.concat(",\"category"+i+"\":\""+categoriesToReport[i]+"\"");
+        final StringBuffer response = new StringBuffer();
+        String json = "{\"reporterID\":\"" + Email + "\",\"plateNo\":\"" + licencePlate + "\"";
+        for (int i = 0; i < 6; i++) {
+            json = json.concat(",\"category" + i + "\":\"" + categoriesToReport[i] + "\"");
         }
-        final String JSON=json.concat("}");
-        Log.i("json",JSON);
+        final String JSON = json.concat("}");
+        Log.i("json", JSON);
         final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://"+ip+":"+port+"/report");
+                    URL url = new URL("http://" + ip + ":" + port + "/report");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setDoOutput(true);
                     conn.setRequestMethod("POST");
@@ -285,9 +289,9 @@ public class LoggedIn extends AppCompatActivity
                     in.close();
                     conn.disconnect();
 
-                }catch (Exception e){
+                } catch (Exception e) {
                     //error occured
-                    Log.d("error",e.toString());
+                    Log.d("error", e.toString());
                 }
             }
         });
@@ -298,10 +302,9 @@ public class LoggedIn extends AppCompatActivity
             e.printStackTrace();
         }
 
-        if(response.toString().equals("done")) {
-            Toast.makeText(this,"reported successfully",Toast.LENGTH_LONG).show();
+        if (response.toString().equals("done")) {
+            Toast.makeText(this, "reported successfully", Toast.LENGTH_SHORT).show();
         }
-
 
 
     }
@@ -464,11 +467,60 @@ public class LoggedIn extends AppCompatActivity
             report.setVisibility(View.VISIBLE);
         } else if (id == R.id.reportAgainst) {
             reportAgainst.setVisibility(View.VISIBLE);
+            try {
+                getReports();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void getReports() throws JSONException {
+        final StringBuffer response = new StringBuffer();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/report/" + Email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        JSONObject obj=new JSONObject(response.toString());
+        JSONArray arr = obj.getJSONArray("reports");
+        for(int i=0;i<arr.length();i++)
+        {
+            Log.i("reports"+i, String.valueOf(new JSONObject(arr.getString(i))));
+        }
+        mRecyclerView =findViewById(R.id.rv_reports);
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mAdapter= new reportsAdapter(arr,this);
+        mRecyclerView.setAdapter(mAdapter);
+
     }
 
     private void clickMonitor(View view) {
