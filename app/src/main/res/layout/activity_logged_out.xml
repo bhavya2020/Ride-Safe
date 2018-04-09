@@ -3,29 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorPrimaryDark"
+    android:gravity="center">
 
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:paddingBottom="10dp"
-        android:paddingTop="200dp"
-        android:text="Sign In"
+        android:text="SAFE GO"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="@android:color/background_light"
-        android:textSize="45dp" />
+        android:textSize="45sp"
+        android:layout_gravity="center"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/signIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="visible"
-        android:layout_marginTop="100dp"
-        android:layout_marginLeft="20dp"
-        app:buttonSize="wide">
+        app:buttonSize="wide"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center">
 
     </com.google.android.gms.common.SignInButton>
 

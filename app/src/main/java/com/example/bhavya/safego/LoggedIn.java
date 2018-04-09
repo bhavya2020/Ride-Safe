@@ -68,6 +68,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -75,6 +77,10 @@ public class LoggedIn extends AppCompatActivity
     Boolean isMonitoring = false;
     private reportsAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private final static String ip = "192.168.1.6";
+    private final static String port = "5555";
+    private String Email;
+    private GoogleSignInClient mGoogleSignInClient;
 
     private SharedPreferences mPrefs;
 
@@ -126,11 +132,6 @@ public class LoggedIn extends AppCompatActivity
         Log.i("destroy", "destroying activity");
     }
 
-    private final static String ip = "192.168.1.6";
-    private final static String port = "5555";
-    private String Email;
-    private SQLiteDatabase accDB, laDB, magDB, gyrDB;
-    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,10 +214,34 @@ public class LoggedIn extends AppCompatActivity
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        final Button editProfile = findViewById(R.id.edit);
         final Button updateProfile = findViewById(R.id.update);
+        editProfile.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                editProfile.setVisibility(View.GONE);
+                updateProfile.setVisibility(View.VISIBLE);
+                EditText DLno = findViewById(R.id.DLno);
+                EditText numberPlate = findViewById(R.id.numPlate);
+                EditText gender = findViewById(R.id.gender);
+                EditText phoneNo = findViewById(R.id.phoneno);
+                EditText age = findViewById(R.id.age);
+
+                DLno.setEnabled(true);
+                numberPlate.setEnabled(true);
+                gender.setEnabled(true);
+                phoneNo.setEnabled(true);
+                age.setEnabled(true);
+
+            }
+        });
+
         updateProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                editProfile.setVisibility(View.VISIBLE);
+                updateProfile.setVisibility(View.GONE);
                 Log.i("up", "updating");
                 try {
                     UpdateProfile();
@@ -257,7 +282,7 @@ public class LoggedIn extends AppCompatActivity
         });
     }
 
-    private void report(String licencePlate, boolean[] categoriesToReport)  {
+    private void report(String licencePlate, boolean[] categoriesToReport) {
 
         final StringBuffer response = new StringBuffer();
         String json = "{\"reporterID\":\"" + Email + "\",\"plateNo\":\"" + licencePlate + "\"";
@@ -310,10 +335,6 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-public Loader<Void> onCreateLoader(){
-
-    return new Loader<>(this);
-}
     private String isUnder18(Uri photoUrl) {
         final StringBuffer response = new StringBuffer();
         Thread thread = new Thread(new Runnable() {
@@ -447,8 +468,8 @@ public Loader<Void> onCreateLoader(){
         int id = item.getItemId();
 
         LinearLayout home = findViewById(R.id.homeL);
-        LinearLayout profile=findViewById(R.id.profileL);
-        LinearLayout about=findViewById(R.id.aboutL);
+        LinearLayout profile = findViewById(R.id.profileL);
+        LinearLayout about = findViewById(R.id.aboutL);
         LinearLayout monitor = findViewById(R.id.monitorL);
         LinearLayout see = findViewById(R.id.seeL);
         LinearLayout distraction = findViewById(R.id.distractionL);
@@ -481,9 +502,9 @@ public Loader<Void> onCreateLoader(){
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }  else if(id==R.id.profile){
+        } else if (id == R.id.profile) {
             profile.setVisibility(View.VISIBLE);
-        }else if(id==R.id.about){
+        } else if (id == R.id.about) {
             about.setVisibility(View.VISIBLE);
         }
 
@@ -521,17 +542,16 @@ public Loader<Void> onCreateLoader(){
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        JSONObject obj=new JSONObject(response.toString());
+        JSONObject obj = new JSONObject(response.toString());
         JSONArray arr = obj.getJSONArray("reports");
-        for(int i=0;i<arr.length();i++)
-        {
-            Log.i("reports"+i, String.valueOf(new JSONObject(arr.getString(i))));
+        for (int i = 0; i < arr.length(); i++) {
+            Log.i("reports" + i, String.valueOf(new JSONObject(arr.getString(i))));
         }
-        mRecyclerView =findViewById(R.id.rv_reports);
+        mRecyclerView = findViewById(R.id.rv_reports);
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
-        mAdapter= new reportsAdapter(arr,this);
+        mAdapter = new reportsAdapter(arr, this);
         mRecyclerView.setAdapter(mAdapter);
 
     }
@@ -561,7 +581,11 @@ public Loader<Void> onCreateLoader(){
         EditText gender = findViewById(R.id.gender);
         EditText phoneNo = findViewById(R.id.phoneno);
         EditText age = findViewById(R.id.age);
-
+        DLno.setEnabled(false);
+        numberPlate.setEnabled(false);
+        gender.setEnabled(false);
+        phoneNo.setEnabled(false);
+        age.setEnabled(false);
         final StringBuffer response = new StringBuffer();
         final String json = "{\"DLno\":\"" + DLno.getText() + "\",\"licencePlateNo\":\"" + numberPlate.getText() + "\",\"gender\":\"" + gender.getText() + "\",\"age\":\"" + age.getText() + "\",\"phoneNo\":\"" + phoneNo.getText() + "\",\"email\":\"" + Email + "\"}";
         final Thread thread = new Thread(new Runnable() {
