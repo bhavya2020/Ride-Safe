@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -126,7 +127,7 @@ public class LoggedIn extends AppCompatActivity
     }
 
     private final static String ip = "192.168.1.6";
-    private final static String port = "6666";
+    private final static String port = "5555";
     private String Email;
     private SQLiteDatabase accDB, laDB, magDB, gyrDB;
     private GoogleSignInClient mGoogleSignInClient;
@@ -309,6 +310,10 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
+public Loader<Void> onCreateLoader(){
+
+    return new Loader<>(this);
+}
     private String isUnder18(Uri photoUrl) {
         final StringBuffer response = new StringBuffer();
         Thread thread = new Thread(new Runnable() {
@@ -442,6 +447,8 @@ public class LoggedIn extends AppCompatActivity
         int id = item.getItemId();
 
         LinearLayout home = findViewById(R.id.homeL);
+        LinearLayout profile=findViewById(R.id.profileL);
+        LinearLayout about=findViewById(R.id.aboutL);
         LinearLayout monitor = findViewById(R.id.monitorL);
         LinearLayout see = findViewById(R.id.seeL);
         LinearLayout distraction = findViewById(R.id.distractionL);
@@ -449,6 +456,8 @@ public class LoggedIn extends AppCompatActivity
         LinearLayout reportAgainst = findViewById(R.id.reportAgainstL);
 
         home.setVisibility(View.GONE);
+        profile.setVisibility(View.GONE);
+        about.setVisibility(View.GONE);
         monitor.setVisibility(View.GONE);
         see.setVisibility(View.GONE);
         distraction.setVisibility(View.GONE);
@@ -472,6 +481,10 @@ public class LoggedIn extends AppCompatActivity
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }  else if(id==R.id.profile){
+            profile.setVisibility(View.VISIBLE);
+        }else if(id==R.id.about){
+            about.setVisibility(View.VISIBLE);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

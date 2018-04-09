@@ -31,7 +31,7 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
     private SQLiteDatabase accDB, laDB, magDB, gyrDB;
     private String email;
     private Context context;
-    private final String port = "6666";
+    private final String port = "5555";
     private final String ip = "192.168.1.6";
 
     public stopMonitor(String Email, Context context) {

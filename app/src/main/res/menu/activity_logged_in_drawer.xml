@@ -5,6 +5,16 @@
         <item
             android:id="@+id/home"
             android:title="Home" />
+
+        <item
+            android:id="@+id/about"
+            android:title="about safeGo" />
+        <item
+            android:id="@+id/profile"
+            android:title="your profile" />
+    </group>
+    <group android:checkableBehavior="single">
+
         <item
             android:id="@+id/monitor"
             android:title="monitor" />
