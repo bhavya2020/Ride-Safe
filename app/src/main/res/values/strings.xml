@@ -8,4 +8,6 @@
     <string name="port">6666</string>
     <string name="clientSecret">4ZXGOkkzCxONF59etq7Crc73</string>
     <string name="action_settings">Settings</string>
+    <item type="id" name="email" />
+    <item type="id" name="hide_show" />
 </resources>
