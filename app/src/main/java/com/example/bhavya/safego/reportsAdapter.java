@@ -78,7 +78,7 @@ public class reportsAdapter extends RecyclerView.Adapter<reportsAdapter.reportsA
         return reports.length();
     }
 
-    class reportsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    static class reportsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         final TextView reporterId;
         final TextView suddenBreaks;

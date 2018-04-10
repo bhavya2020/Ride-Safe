@@ -140,23 +140,23 @@
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
+                        android:labelFor="@+id/DLno"
                         android:padding="10dp"
                         android:text="DLno:"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:labelFor="@+id/DLno"/>
+                        android:textSize="20sp" />
 
                     <EditText
-                        android:textColor="@android:color/black"
-                        android:enabled="false"
                         android:id="@+id/DLno"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"
                         android:background="@android:color/transparent"
                         android:backgroundTint="@color/colorPrimary"
+                        android:enabled="false"
                         android:padding="10dp"
-                        android:text="enter your licence no" />
+                        android:text="enter your licence no"
+                        android:textColor="@android:color/black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -167,23 +167,23 @@
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
+                        android:labelFor="@+id/numPlate"
                         android:padding="10dp"
                         android:text="number plate:"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:labelFor="@+id/numPlate"/>
+                        android:textSize="20sp" />
 
                     <EditText
-                        android:textColor="@android:color/black"
-                        android:enabled="false"
                         android:id="@+id/numPlate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"
                         android:background="@android:color/transparent"
                         android:backgroundTint="@color/colorPrimary"
+                        android:enabled="false"
                         android:padding="10dp"
-                        android:text="enter your number plate" />
+                        android:text="enter your number plate"
+                        android:textColor="@android:color/black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -194,23 +194,23 @@
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
+                        android:labelFor="@+id/gender"
                         android:padding="10dp"
                         android:text="gender:"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:labelFor="@+id/gender"/>
+                        android:textSize="20sp" />
 
                     <EditText
-                        android:textColor="@android:color/black"
-                        android:enabled="false"
                         android:id="@+id/gender"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"
                         android:background="@android:color/transparent"
                         android:backgroundTint="@color/colorPrimary"
+                        android:enabled="false"
                         android:padding="10dp"
-                        android:text="enter your gender" />
+                        android:text="enter your gender"
+                        android:textColor="@android:color/black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -221,23 +221,23 @@
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
+                        android:labelFor="@+id/phoneno"
                         android:padding="10dp"
                         android:text="phone no:"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:labelFor="@+id/phoneno"/>
+                        android:textSize="20sp" />
 
                     <EditText
-                        android:textColor="@android:color/black"
-                        android:enabled="false"
                         android:id="@+id/phoneno"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"
                         android:background="@android:color/transparent"
                         android:backgroundTint="@color/colorPrimary"
+                        android:enabled="false"
                         android:padding="10dp"
-                        android:text="enter your phone no" />
+                        android:text="enter your phone no"
+                        android:textColor="@android:color/black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -248,23 +248,23 @@
                     <TextView
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
+                        android:labelFor="@+id/age"
                         android:padding="10dp"
                         android:text="age:"
                         android:textColor="@color/colorPrimary"
-                        android:textSize="20sp"
-                        android:labelFor="@+id/age"/>
+                        android:textSize="20sp" />
 
                     <EditText
-                        android:enabled="false"
                         android:id="@+id/age"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="2dp"
                         android:background="@android:color/transparent"
                         android:backgroundTint="@color/colorPrimary"
+                        android:enabled="false"
                         android:padding="10dp"
-                        android:textColor="@android:color/black"
-                        android:text="enter your age" />
+                        android:text="enter your age"
+                        android:textColor="@android:color/black" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -277,8 +277,8 @@
                 android:text="EDIT PROFILE"
                 android:textColor="@android:color/background_light"
                 android:textSize="20sp" />
+
             <Button
-                android:visibility="gone"
                 android:id="@+id/update"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -286,7 +286,8 @@
                 android:background="@color/colorPrimaryDark"
                 android:text="UPDATE PROFILE"
                 android:textColor="@android:color/background_light"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="gone" />
 
 
         </LinearLayout>
@@ -338,17 +339,65 @@
                 android:layout_height="wrap_content"
                 android:text="distraction" />
         </LinearLayout>
-        <!--see-->
+        <!--add driver-->
+
         <LinearLayout
-            android:id="@+id/seeL"
+            android:id="@+id/addDriverL"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
             android:visibility="gone">
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="5dp"
+                android:background="@color/colorPrimaryDark" />
+
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="see" />
+                android:layout_margin="10dp"
+                android:gravity="center"
+                android:text="Add A Driver"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="30sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginBottom="2dp"
+                android:background="@color/colorPrimaryDark" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/driverKey"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:hint="enter driver's key" />
+
+                <Button
+                    android:id="@+id/addDriverBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_margin="5dp"
+                    android:background="@color/colorAccent"
+                    android:text="ADD"
+                    android:textColor="@android:color/background_light" />
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/drivers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp" />
+
         </LinearLayout>
         <!--report against-->
         <LinearLayout

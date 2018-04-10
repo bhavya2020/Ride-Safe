@@ -32,7 +32,7 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
     private String email;
     private Context context;
     private final String port = "5555";
-    private final String ip = "192.168.1.6";
+    private final String ip = "192.168.1.4";
 
     public stopMonitor(String Email, Context context) {
         this.email = Email;
@@ -59,11 +59,34 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
         if (sendAccelerationData(allACC).equals("done"))
             if (sendLinearAccelerationData(allLA).equals("done"))
                 if (sendGyroscopeData(allGYR).equals("done"))
-                    if (sendMagnetometerData(allMAG).equals("done")) {
+                    if (sendMagnetometerData(allMAG).equals("done"))
+                        if(doPrediction().equals("done")){
                         delete();
                         result = getResult();
                     }
         return result;
+    }
+    private String doPrediction(){
+        final StringBuffer response = new StringBuffer();
+
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/prediction/" + email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+
+        return response.toString();
     }
 
     private String sendMagnetometerData(Cursor allMAG) {

@@ -1,5 +1,7 @@
 package com.example.bhavya.safego;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +18,8 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.Loader;
@@ -76,10 +80,13 @@ public class LoggedIn extends AppCompatActivity
 
     Boolean isMonitoring = false;
     private reportsAdapter mAdapter;
+    private driversAdapter dAdapter;
     private RecyclerView mRecyclerView;
-    private final static String ip = "192.168.1.6";
+    private RecyclerView driversView;
+    private final static String ip = "192.168.1.4";
     private final static String port = "5555";
     private String Email;
+    private String key;
     private GoogleSignInClient mGoogleSignInClient;
 
     private SharedPreferences mPrefs;
@@ -158,6 +165,7 @@ public class LoggedIn extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         View header = navigationView.getHeaderView(0);
+
         Intent intent = getIntent();
         TextView username;
         TextView logout;
@@ -205,8 +213,9 @@ public class LoggedIn extends AppCompatActivity
             android.net.Uri profileUrl = account.getPhotoUrl();
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
+        key=getKey();
         TextView isUnder18 = findViewById(R.id.isUnder18);
-        String IsUnder18 = isUnder18(account.getPhotoUrl());
+        String IsUnder18 = isUnder18();
         if (IsUnder18.equals("1"))
             isUnder18.setVisibility(View.VISIBLE);
         try {
@@ -274,12 +283,59 @@ public class LoggedIn extends AppCompatActivity
 
             }
         });
+        final Button addDriverButton=findViewById(R.id.addDriverBtn);
+        addDriverButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    addDriver();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 signOut();
             }
         });
+    }
+
+
+    private String getKey() {
+        final StringBuffer response = new StringBuffer();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/key/" + Email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        };
+        String KEY=response.toString();
+        KEY=KEY.substring(1,KEY.length()-1);
+        Log.i("key",response.toString());
+        return KEY;
     }
 
     private void report(String licencePlate, boolean[] categoriesToReport) {
@@ -335,7 +391,7 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-    private String isUnder18(Uri photoUrl) {
+    private String isUnder18() {
         final StringBuffer response = new StringBuffer();
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -443,8 +499,11 @@ public class LoggedIn extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_key) {
+            Log.i("key",key);
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("key", key);
+            clipboard.setPrimaryClip(clip);
         }
 
         return super.onOptionsItemSelected(item);
@@ -471,7 +530,7 @@ public class LoggedIn extends AppCompatActivity
         LinearLayout profile = findViewById(R.id.profileL);
         LinearLayout about = findViewById(R.id.aboutL);
         LinearLayout monitor = findViewById(R.id.monitorL);
-        LinearLayout see = findViewById(R.id.seeL);
+        LinearLayout addDriver = findViewById(R.id.addDriverL);
         LinearLayout distraction = findViewById(R.id.distractionL);
         LinearLayout report = findViewById(R.id.reportL);
         LinearLayout reportAgainst = findViewById(R.id.reportAgainstL);
@@ -480,7 +539,7 @@ public class LoggedIn extends AppCompatActivity
         profile.setVisibility(View.GONE);
         about.setVisibility(View.GONE);
         monitor.setVisibility(View.GONE);
-        see.setVisibility(View.GONE);
+        addDriver.setVisibility(View.GONE);
         distraction.setVisibility(View.GONE);
         report.setVisibility(View.GONE);
         reportAgainst.setVisibility(View.GONE);
@@ -490,7 +549,12 @@ public class LoggedIn extends AppCompatActivity
         } else if (id == R.id.home) {
             home.setVisibility(View.VISIBLE);
         } else if (id == R.id.see) {
-            see.setVisibility(View.VISIBLE);
+            addDriver.setVisibility(View.VISIBLE);
+            try {
+                getDrivers();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (id == R.id.distraction) {
             distraction.setVisibility(View.VISIBLE);
         } else if (id == R.id.report) {
@@ -511,6 +575,46 @@ public class LoggedIn extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void getDrivers() throws JSONException {
+        final StringBuffer response = new StringBuffer();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/drivers/" + Email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.i("drivers-res",response.toString());
+        JSONObject obj = new JSONObject(response.toString());
+        JSONArray arr = obj.getJSONArray("drivers");
+        driversView = findViewById(R.id.drivers);
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        driversView.setLayoutManager(layoutManager);
+        dAdapter = new driversAdapter(arr, this);
+        driversView.setAdapter(dAdapter);
     }
 
     private void getReports() throws JSONException {
@@ -573,6 +677,58 @@ public class LoggedIn extends AppCompatActivity
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         stopService(service);
         new stopMonitor(Email, this).execute();
+    }
+
+    private void addDriver() throws JSONException {
+
+        EditText driver=findViewById(R.id.driverKey);
+        String driversKey=driver.getText().toString();
+        final StringBuffer response = new StringBuffer();
+        final String json = "{\"manager\":\"" + Email + "\",\"driverKey\":\"" + driversKey + "\"}";
+        Log.i("add",json);
+        final Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/addDriver");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setDoOutput(true);
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    OutputStream os;
+                    os = conn.getOutputStream();
+                    os.write(json.getBytes());
+                    os.flush();
+                    os.close();
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+
+                } catch (Exception e) {
+                    //error occurred
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        driver.setText("");
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (response.toString().equals("done")) {
+            getDrivers();
+        }else if(response.toString().equals("notDone")){
+            Toast.makeText(this,"Incorrect key",Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void UpdateProfile() throws JSONException {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+    <TextView
+        android:id="@+id/driverName"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_gravity="left"
+        android:layout_margin="2dp"
+        android:text="driver name"/>
+
+    <Button
+        android:id="@+id/monitorDriverBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:padding="2dp"
+        android:background="@color/colorPrimaryDark"
+        android:text="Monitor"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/StopMonitorDriverBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:padding="2dp"
+        android:background="@color/colorPrimaryDark"
+        android:text="Stop Monitor"
+        android:textColor="@android:color/background_light"
+        android:textSize="18sp" />
+</LinearLayout>
