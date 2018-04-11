@@ -31,7 +31,7 @@ public class driversAdapter extends RecyclerView.Adapter<driversAdapter.driversA
     private SharedPreferences mPrefs;
     private JSONArray drivers;
     private Context mContext;
-    private final static String ip = "192.168.1.4";
+    private final static String ip = "192.168.43.170";
     private final static String port = "5555";
 
     public driversAdapter(JSONArray drivers, Context context) {

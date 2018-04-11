@@ -1,11 +1,15 @@
 package com.example.bhavya.safego;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
@@ -14,10 +18,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -71,6 +77,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,13 +86,15 @@ public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     Boolean isMonitoring = false;
+    Boolean isImageServiceStarted=false;
     private reportsAdapter mAdapter;
     private driversAdapter dAdapter;
     private RecyclerView mRecyclerView;
     private RecyclerView driversView;
-    private final static String ip = "192.168.1.4";
+    private final static String ip = "192.168.43.170";
     private final static String port = "5555";
     private String Email;
+    private static final int MY_REQUEST_CODE = 3;
     private String key;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -141,13 +150,32 @@ public class LoggedIn extends AppCompatActivity
 
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Now user should be able to use camera
+                Log.i("permission","granted");
+            }
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
         Log.i("create", "creating activity");
-
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        isImageServiceStarted=mPrefs.getBoolean("isImageServiceStarted",false);
         isMonitoring = mPrefs.getBoolean("isMonitoring", false);
+
+        if (checkSelfPermission(Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_REQUEST_CODE);
+        }
+
+
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -214,6 +242,16 @@ public class LoggedIn extends AppCompatActivity
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
         key=getKey();
+        //TODO: make it not image service started
+        if(isImageServiceStarted)
+        {
+            SharedPreferences.Editor ed = mPrefs.edit();
+            ed.putBoolean("isImageServiceStarted",true);
+            ed.putString("uname",Email);
+            ed.apply();
+            Intent service = new Intent(getBaseContext(), ImageService.class);
+            startService(service);
+        }
         TextView isUnder18 = findViewById(R.id.isUnder18);
         String IsUnder18 = isUnder18();
         if (IsUnder18.equals("1"))

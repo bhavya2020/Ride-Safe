@@ -32,7 +32,7 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
     private String email;
     private Context context;
     private final String port = "5555";
-    private final String ip = "192.168.1.4";
+    private final String ip = "192.168.43.170";
 
     public stopMonitor(String Email, Context context) {
         this.email = Email;
