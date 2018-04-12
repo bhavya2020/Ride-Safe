@@ -13,5 +13,7 @@ public class linearAccelerationContract {
         public static final String Y= "y";
         public static final String Z= "z";
         public static final String COLUMN_TIMESTAMP = "timestamp";
+        public static final String LATITUDE="latitude";
+        public static final String LONGITUDE="longitude";
     }
 }

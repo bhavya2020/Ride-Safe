@@ -14,7 +14,7 @@ public class accelerometerDbHelper extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "acc.db";
 
     // If you change the database schema, you must increment the database version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Constructor
     public accelerometerDbHelper(Context context) {
@@ -27,7 +27,9 @@ public class accelerometerDbHelper extends SQLiteOpenHelper{
                 accelerometerContract.accelerometer.X+ " FLOAT ," +
                 accelerometerContract.accelerometer.Y + " FLOAT , " +
                 accelerometerContract.accelerometer.Z + " FLOAT , " +
-                accelerometerContract.accelerometer.COLUMN_TIMESTAMP + " STRING " +
+                accelerometerContract.accelerometer.COLUMN_TIMESTAMP + " STRING, " +
+                accelerometerContract.accelerometer.LATITUDE+ " FLOAT ," +
+                accelerometerContract.accelerometer.LONGITUDE+ " FLOAT " +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_TABLE);
     }

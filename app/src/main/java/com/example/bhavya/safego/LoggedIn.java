@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,6 +29,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -63,6 +65,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -77,17 +87,20 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     Boolean isMonitoring = false;
-    Boolean isImageServiceStarted=false;
+    Boolean isImageServiceStarted = false;
     private reportsAdapter mAdapter;
+    private GoogleMap mMap;
     private driversAdapter dAdapter;
     private RecyclerView mRecyclerView;
     private RecyclerView driversView;
@@ -155,10 +168,11 @@ public class LoggedIn extends AppCompatActivity
         if (requestCode == MY_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Now user should be able to use camera
-                Log.i("permission","granted");
+                Log.i("permission", "granted");
             }
         }
     }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,15 +180,14 @@ public class LoggedIn extends AppCompatActivity
         setContentView(R.layout.activity_logged_in);
         Log.i("create", "creating activity");
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        isImageServiceStarted=mPrefs.getBoolean("isImageServiceStarted",false);
+        isImageServiceStarted = mPrefs.getBoolean("isImageServiceStarted", false);
         isMonitoring = mPrefs.getBoolean("isMonitoring", false);
 
         if (checkSelfPermission(Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_REQUEST_CODE);
+            requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, MY_REQUEST_CODE);
         }
-
 
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -241,13 +254,12 @@ public class LoggedIn extends AppCompatActivity
             android.net.Uri profileUrl = account.getPhotoUrl();
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
-        key=getKey();
+        key = getKey();
         //TODO: make it not image service started
-        if(!isImageServiceStarted)
-        {
+        if (!isImageServiceStarted) {
             SharedPreferences.Editor ed = mPrefs.edit();
-            ed.putBoolean("isImageServiceStarted",true);
-            ed.putString("uname",Email);
+            ed.putBoolean("isImageServiceStarted", true);
+            ed.putString("uname", Email);
             ed.apply();
             Intent service = new Intent(getBaseContext(), ImageService.class);
             startService(service);
@@ -321,7 +333,7 @@ public class LoggedIn extends AppCompatActivity
 
             }
         });
-        final Button addDriverButton=findViewById(R.id.addDriverBtn);
+        final Button addDriverButton = findViewById(R.id.addDriverBtn);
         addDriverButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -369,10 +381,11 @@ public class LoggedIn extends AppCompatActivity
             thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        };
-        String KEY=response.toString();
-        KEY=KEY.substring(1,KEY.length()-1);
-        Log.i("key",response.toString());
+        }
+        ;
+        String KEY = response.toString();
+        KEY = KEY.substring(1, KEY.length() - 1);
+        Log.i("key", response.toString());
         return KEY;
     }
 
@@ -538,7 +551,7 @@ public class LoggedIn extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_key) {
-            Log.i("key",key);
+            Log.i("key", key);
             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("key", key);
             clipboard.setPrimaryClip(clip);
@@ -595,6 +608,14 @@ public class LoggedIn extends AppCompatActivity
             }
         } else if (id == R.id.distraction) {
             distraction.setVisibility(View.VISIBLE);
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            if (mapFragment != null)
+                mapFragment.getMapAsync(this);
+
+
+
+
         } else if (id == R.id.report) {
             report.setVisibility(View.VISIBLE);
         } else if (id == R.id.reportAgainst) {
@@ -614,6 +635,7 @@ public class LoggedIn extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     private void getDrivers() throws JSONException {
         final StringBuffer response = new StringBuffer();
@@ -644,7 +666,7 @@ public class LoggedIn extends AppCompatActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.i("drivers-res",response.toString());
+        Log.i("drivers-res", response.toString());
         JSONObject obj = new JSONObject(response.toString());
         JSONArray arr = obj.getJSONArray("drivers");
         driversView = findViewById(R.id.drivers);
@@ -719,11 +741,11 @@ public class LoggedIn extends AppCompatActivity
 
     private void addDriver() throws JSONException {
 
-        EditText driver=findViewById(R.id.driverKey);
-        String driversKey=driver.getText().toString();
+        EditText driver = findViewById(R.id.driverKey);
+        String driversKey = driver.getText().toString();
         final StringBuffer response = new StringBuffer();
         final String json = "{\"manager\":\"" + Email + "\",\"driverKey\":\"" + driversKey + "\"}";
-        Log.i("add",json);
+        Log.i("add", json);
         final Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -763,8 +785,8 @@ public class LoggedIn extends AppCompatActivity
         }
         if (response.toString().equals("done")) {
             getDrivers();
-        }else if(response.toString().equals("notDone")){
-            Toast.makeText(this,"Incorrect key",Toast.LENGTH_LONG).show();
+        } else if (response.toString().equals("notDone")) {
+            Toast.makeText(this, "Incorrect key", Toast.LENGTH_LONG).show();
         }
 
     }
@@ -823,4 +845,166 @@ public class LoggedIn extends AppCompatActivity
         }
 
     }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        mMap = map;
+
+//        LatLng sydney = new LatLng(-33.867, 151.206);
+//
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+ map.setMyLocationEnabled(true);
+        JSONArray result=null;
+        try {
+            result= getResults();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            showResult(result);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+//
+//        map.addMarker(new MarkerOptions()
+//                .title("Sydney")
+//                .snippet("The most populous city in Australia.")
+//                .position(sydney));
+
+
+    }
+
+
+    private JSONArray getResults() throws JSONException {
+
+        final StringBuffer response = new StringBuffer();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/result/" + Email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        JSONObject obj = new JSONObject(response.toString());
+
+        return obj.getJSONArray("trip");
+
+    }
+
+    private void showResult(JSONArray result) throws JSONException {
+
+
+        List<ColouredPoint> points=new ArrayList<>();
+        for(int i=0;i<result.length();i++)
+        {
+            JSONObject obj=result.getJSONObject(i);
+            LatLng lt=new LatLng(obj.getDouble("latitude"),obj.getDouble("longitude"));
+            if(i==0)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lt,13));
+            ColouredPoint cp=new ColouredPoint(lt,getColour(obj.getInt("class")));
+
+            points.add(cp);
+        }
+
+        showPolyline(points);
+
+//        List<ColouredPoint> sourcePoints = new ArrayList<>();
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.27801,149.12958), Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28032,149.12907),  Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28099,149.12929),  Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28144,149.12984),  Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28194,149.13003), Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28282,149.12956), Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28302,149.12881), Color.RED));
+//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28473,149.12836), Color.RED));
+//
+//        showPolyline(sourcePoints);
+
+    }
+
+    private int getColour(int aClass) {
+
+        switch (aClass)
+        {
+            case 0: return Color.RED;
+            case 1: return Color.BLUE;
+            case 2: return Color.YELLOW;
+            case 3: return Color.GREEN;
+            case 4: return Color.MAGENTA;
+            default: return  Color.CYAN;
+        }
+    }
+
+    private void showPolyline(List<ColouredPoint> points) {
+
+        if (points.size() < 2)
+            return;
+
+        int ix = 0;
+        ColouredPoint currentPoint  = points.get(ix);
+        int currentColor = currentPoint.color;
+        List<LatLng> currentSegment = new ArrayList<>();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPoint.coords,15));
+        currentSegment.add(currentPoint.coords);
+        ix++;
+
+        while (ix < points.size()) {
+            currentPoint = points.get(ix);
+
+            if (currentPoint.color == currentColor) {
+                currentSegment.add(currentPoint.coords);
+            } else {
+                currentSegment.add(currentPoint.coords);
+                mMap.addPolyline(new PolylineOptions()
+                        .addAll(currentSegment)
+                        .color(currentColor)
+                        .width(20));
+                currentColor = currentPoint.color;
+                currentSegment.clear();
+                currentSegment.add(currentPoint.coords);
+            }
+
+            ix++;
+        }
+
+        mMap.addPolyline(new PolylineOptions()
+                .addAll(currentSegment)
+                .color(currentColor)
+                .width(20));
+
+    }
+
+
 }

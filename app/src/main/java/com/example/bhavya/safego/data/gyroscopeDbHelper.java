@@ -14,7 +14,7 @@ public class gyroscopeDbHelper  extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "gyr.db";
 
     // If you change the database schema, you must increment the database version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Constructor
     public gyroscopeDbHelper(Context context) {
@@ -27,7 +27,9 @@ public class gyroscopeDbHelper  extends SQLiteOpenHelper {
                 gyroscopeContract.gyroscope.X+ " FLOAT ," +
                 gyroscopeContract.gyroscope.Y + " FLOAT , " +
                 gyroscopeContract.gyroscope.Z + " FLOAT , " +
-                gyroscopeContract.gyroscope.COLUMN_TIMESTAMP + " STRING " +
+                gyroscopeContract.gyroscope.COLUMN_TIMESTAMP + " STRING ," +
+                gyroscopeContract.gyroscope.LATITUDE+ " FLOAT ," +
+                gyroscopeContract.gyroscope.LONGITUDE+ " FLOAT " +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_TABLE);
     }

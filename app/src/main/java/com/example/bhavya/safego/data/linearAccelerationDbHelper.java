@@ -14,7 +14,7 @@ public class linearAccelerationDbHelper  extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "la.db";
 
     // If you change the database schema, you must increment the database version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Constructor
     public linearAccelerationDbHelper(Context context) {
@@ -27,7 +27,9 @@ public class linearAccelerationDbHelper  extends SQLiteOpenHelper {
                 linearAccelerationContract.linearAcceleration.X+ " FLOAT ," +
                 linearAccelerationContract.linearAcceleration.Y + " FLOAT , " +
                 linearAccelerationContract.linearAcceleration.Z + " FLOAT , " +
-                linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP + " STRING " +
+                linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP + " STRING ," +
+                linearAccelerationContract.linearAcceleration.LATITUDE+ " FLOAT ," +
+                linearAccelerationContract.linearAcceleration.LONGITUDE+ " FLOAT " +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_TABLE);
     }

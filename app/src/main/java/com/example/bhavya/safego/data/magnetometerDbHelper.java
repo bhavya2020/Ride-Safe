@@ -14,7 +14,7 @@ public class magnetometerDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "mag.db";
 
     // If you change the database schema, you must increment the database version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Constructor
     public magnetometerDbHelper(Context context) {
@@ -27,7 +27,9 @@ public class magnetometerDbHelper extends SQLiteOpenHelper {
                 magnetometerContract.magnetometer.X+ " FLOAT ," +
                 magnetometerContract.magnetometer.Y + " FLOAT , " +
                 magnetometerContract.magnetometer.Z + " FLOAT , " +
-                magnetometerContract.magnetometer.COLUMN_TIMESTAMP + " STRING " +
+                magnetometerContract.magnetometer.COLUMN_TIMESTAMP + " STRING ," +
+                magnetometerContract.magnetometer.LATITUDE+ " FLOAT ," +
+                magnetometerContract.magnetometer.LONGITUDE+ " FLOAT " +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_TABLE);
     }

@@ -97,13 +97,15 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                 Float y = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Y));
                 Float z = allMAG.getFloat(allMAG.getColumnIndex(magnetometerContract.magnetometer.Z));
                 String timeStamp = allMAG.getString(allMAG.getColumnIndex(magnetometerContract.magnetometer.COLUMN_TIMESTAMP));
+                double latitude=allMAG.getDouble(allMAG.getColumnIndex(magnetometerContract.magnetometer.LATITUDE));
+                double longitude=allMAG.getDouble(allMAG.getColumnIndex(magnetometerContract.magnetometer.LONGITUDE));
 
                 Log.i("mx", String.valueOf(x));
                 Log.i("my", String.valueOf(y));
                 Log.i("mz", String.valueOf(z));
                 Log.i("mtime", timeStamp);
                 final StringBuffer response = new StringBuffer();
-                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\"}";
+                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\",\"latitude\":\"" + latitude+"\",\"longitude\":\"" + longitude+"\"}";
                 try {
                     URL url = new URL("http://" + ip + ":" + port + "/magnetometer");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -146,13 +148,15 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                 Float y = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Y));
                 Float z = allGYR.getFloat(allGYR.getColumnIndex(gyroscopeContract.gyroscope.Z));
                 String timeStamp = allGYR.getString(allGYR.getColumnIndex(gyroscopeContract.gyroscope.COLUMN_TIMESTAMP));
+                double latitude = allGYR.getDouble(allGYR.getColumnIndex(gyroscopeContract.gyroscope.LATITUDE));
+                double longitude = allGYR.getDouble(allGYR.getColumnIndex(gyroscopeContract.gyroscope.LONGITUDE));
 
                 Log.i("gx", String.valueOf(x));
                 Log.i("gy", String.valueOf(y));
                 Log.i("gz", String.valueOf(z));
                 Log.i("gtime", timeStamp);
                 final StringBuffer response = new StringBuffer();
-                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\"}";
+                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"latitude\":\"" + latitude + "\",\"longitude\":\"" + longitude+"\",\"time\":\"" + timeStamp+"\"}";
                 try {
                     URL url = new URL("http://" + ip + ":" + port + "/gyroscope");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -195,13 +199,15 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                 Float y = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Y));
                 Float z = allLA.getFloat(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.Z));
                 String timeStamp = allLA.getString(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP));
+                double latitude = allLA.getDouble(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.LATITUDE));
+                double longitude = allLA.getDouble(allLA.getColumnIndex(linearAccelerationContract.linearAcceleration.LONGITUDE));
 
                 Log.i("lax", String.valueOf(x));
                 Log.i("lay", String.valueOf(y));
                 Log.i("laz", String.valueOf(z));
                 Log.i("latime", timeStamp);
                 final StringBuffer response = new StringBuffer();
-                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\"}";
+                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\",\"longitude\":\"" + longitude+"\",\"latitude\":\"" + latitude+"\"}";
                 try {
                     URL url = new URL("http://" + ip + ":" + port + "/linearAcceleration");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -244,6 +250,8 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                 Float y = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Y));
                 Float z = allACC.getFloat(allACC.getColumnIndex(accelerometerContract.accelerometer.Z));
                 String timeStamp = allACC.getString(allACC.getColumnIndex(accelerometerContract.accelerometer.COLUMN_TIMESTAMP));
+                double latitude = allACC.getDouble(allACC.getColumnIndex(accelerometerContract.accelerometer.LATITUDE));
+                double longitude = allACC.getDouble(allACC.getColumnIndex(accelerometerContract.accelerometer.LONGITUDE));
 
                 Log.i("ax", String.valueOf(x));
                 Log.i("ay", String.valueOf(y));
@@ -251,7 +259,7 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                 Log.i("atime", timeStamp);
 
                 final StringBuffer response = new StringBuffer();
-                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp + "\"}";
+                final String json = "{\"email\":\"" + email + "\",\"x\":\"" + String.valueOf(x) + "\",\"y\":\"" + String.valueOf(y) + "\",\"z\":\"" + String.valueOf(z) + "\",\"time\":\"" + timeStamp +"\",\"latitude\":\"" + latitude+"\",\"longitude\":\"" + longitude    +"\"}";
                 try {
                     URL url = new URL("http://" + ip + ":" + port + "/accelerometer");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -300,19 +308,19 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
     }
 
     private Cursor getAllValuesOfAccelerometer() {
-        return accDB.query(accelerometerContract.accelerometer.TABLE_NAME, new String[]{accelerometerContract.accelerometer.X, accelerometerContract.accelerometer.Y, accelerometerContract.accelerometer.Z, accelerometerContract.accelerometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+        return accDB.query(accelerometerContract.accelerometer.TABLE_NAME, new String[]{accelerometerContract.accelerometer.X, accelerometerContract.accelerometer.Y, accelerometerContract.accelerometer.Z, accelerometerContract.accelerometer.COLUMN_TIMESTAMP,accelerometerContract.accelerometer.LATITUDE,accelerometerContract.accelerometer.LONGITUDE}, null, null, null, null, null, null);
     }
 
     private Cursor getAllValuesOfLinearAcceleration() {
-        return laDB.query(linearAccelerationContract.linearAcceleration.TABLE_NAME, new String[]{linearAccelerationContract.linearAcceleration.X, linearAccelerationContract.linearAcceleration.Y, linearAccelerationContract.linearAcceleration.Z, linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+        return laDB.query(linearAccelerationContract.linearAcceleration.TABLE_NAME, new String[]{linearAccelerationContract.linearAcceleration.X, linearAccelerationContract.linearAcceleration.Y, linearAccelerationContract.linearAcceleration.Z, linearAccelerationContract.linearAcceleration.COLUMN_TIMESTAMP,linearAccelerationContract.linearAcceleration.LATITUDE,linearAccelerationContract.linearAcceleration.LONGITUDE  }, null, null, null, null, null, null);
     }
 
     private Cursor getAllValuesOfMagnetometer() {
-        return magDB.query(magnetometerContract.magnetometer.TABLE_NAME, new String[]{magnetometerContract.magnetometer.X, magnetometerContract.magnetometer.Y, magnetometerContract.magnetometer.Z, magnetometerContract.magnetometer.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+        return magDB.query(magnetometerContract.magnetometer.TABLE_NAME, new String[]{magnetometerContract.magnetometer.X, magnetometerContract.magnetometer.Y, magnetometerContract.magnetometer.Z, magnetometerContract.magnetometer.COLUMN_TIMESTAMP,magnetometerContract.magnetometer.LATITUDE,magnetometerContract.magnetometer.LONGITUDE}, null, null, null, null, null, null);
     }
 
     private Cursor getAllValuesOfGyroscope() {
-        return gyrDB.query(gyroscopeContract.gyroscope.TABLE_NAME, new String[]{gyroscopeContract.gyroscope.X, gyroscopeContract.gyroscope.Y, gyroscopeContract.gyroscope.Z, gyroscopeContract.gyroscope.COLUMN_TIMESTAMP}, null, null, null, null, null, null);
+        return gyrDB.query(gyroscopeContract.gyroscope.TABLE_NAME, new String[]{gyroscopeContract.gyroscope.X, gyroscopeContract.gyroscope.Y, gyroscopeContract.gyroscope.Z, gyroscopeContract.gyroscope.COLUMN_TIMESTAMP,gyroscopeContract.gyroscope.LATITUDE,gyroscopeContract.gyroscope.LONGITUDE}, null, null, null, null, null, null);
     }
 
     private String getResult() {
