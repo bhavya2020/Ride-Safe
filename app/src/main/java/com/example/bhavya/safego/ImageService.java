@@ -97,6 +97,12 @@ public class ImageService extends Service {
                     }
                 }
             });
+            socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    socket.emit("disconnect",email);
+                }
+            });
             socket.connect();
 
         } catch (URISyntaxException e) {
@@ -104,6 +110,14 @@ public class ImageService extends Service {
         }
 
 
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onDestroy() {
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putBoolean("isImageServiceStarted",false);
+        ed.apply();
+        super.onDestroy();
     }
 }

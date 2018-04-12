@@ -243,7 +243,7 @@ public class LoggedIn extends AppCompatActivity
         }
         key=getKey();
         //TODO: make it not image service started
-        if(isImageServiceStarted)
+        if(!isImageServiceStarted)
         {
             SharedPreferences.Editor ed = mPrefs.edit();
             ed.putBoolean("isImageServiceStarted",true);
