@@ -71,6 +71,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -597,6 +598,12 @@ public class LoggedIn extends AppCompatActivity
 
         if (id == R.id.monitor) {
             monitor.setVisibility(View.VISIBLE);
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            if (mapFragment != null)
+                mapFragment.getMapAsync(this);
+
+
         } else if (id == R.id.home) {
             home.setVisibility(View.VISIBLE);
         } else if (id == R.id.see) {
@@ -608,11 +615,6 @@ public class LoggedIn extends AppCompatActivity
             }
         } else if (id == R.id.distraction) {
             distraction.setVisibility(View.VISIBLE);
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-            if (mapFragment != null)
-                mapFragment.getMapAsync(this);
-
 
 
 
@@ -863,7 +865,6 @@ public class LoggedIn extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
- map.setMyLocationEnabled(true);
         JSONArray result=null;
         try {
             result= getResults();
@@ -926,32 +927,32 @@ public class LoggedIn extends AppCompatActivity
     private void showResult(JSONArray result) throws JSONException {
 
 
+        Marker start,end;
         List<ColouredPoint> points=new ArrayList<>();
         for(int i=0;i<result.length();i++)
         {
             JSONObject obj=result.getJSONObject(i);
-            LatLng lt=new LatLng(obj.getDouble("latitude"),obj.getDouble("longitude"));
-            if(i==0)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lt,13));
+            LatLng lt = new LatLng(obj.getDouble("latitude"), obj.getDouble("longitude"));
+            if(i== 0) {
+                start=mMap.addMarker(new MarkerOptions()
+                .position(lt)
+                .title("start")
+                );
+                start.setTag(0);
+            }
+            if(i==result.length()-1)
+            {
+                end=mMap.addMarker(new MarkerOptions()
+                .position(lt)
+                .title("end"));
+                end.setTag(0);
+            }
             ColouredPoint cp=new ColouredPoint(lt,getColour(obj.getInt("class")));
 
             points.add(cp);
         }
 
         showPolyline(points);
-
-//        List<ColouredPoint> sourcePoints = new ArrayList<>();
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.27801,149.12958), Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28032,149.12907),  Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28099,149.12929),  Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28144,149.12984),  Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28194,149.13003), Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28282,149.12956), Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28302,149.12881), Color.RED));
-//        sourcePoints.add(new ColouredPoint(new LatLng(-35.28473,149.12836), Color.RED));
-//
-//        showPolyline(sourcePoints);
-
     }
 
     private int getColour(int aClass) {
@@ -990,7 +991,7 @@ public class LoggedIn extends AppCompatActivity
                 mMap.addPolyline(new PolylineOptions()
                         .addAll(currentSegment)
                         .color(currentColor)
-                        .width(20));
+                        .width(10));
                 currentColor = currentPoint.color;
                 currentSegment.clear();
                 currentSegment.add(currentPoint.coords);
