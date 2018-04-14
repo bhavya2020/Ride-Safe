@@ -1,6 +1,7 @@
 package com.example.bhavya.safego;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -62,7 +63,7 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
                     if (sendMagnetometerData(allMAG).equals("done"))
                         if(doPrediction().equals("done")){
                         delete();
-                        result = getResult();
+                            result="done";
                     }
         return result;
     }
@@ -323,16 +324,18 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
         return gyrDB.query(gyroscopeContract.gyroscope.TABLE_NAME, new String[]{gyroscopeContract.gyroscope.X, gyroscopeContract.gyroscope.Y, gyroscopeContract.gyroscope.Z, gyroscopeContract.gyroscope.COLUMN_TIMESTAMP,gyroscopeContract.gyroscope.LATITUDE,gyroscopeContract.gyroscope.LONGITUDE}, null, null, null, null, null, null);
     }
 
-    private String getResult() {
-
-        //get request to get csvMonitorResult Data
-        return "done";
-    }
 
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         Log.i("stop-monitor-result", s);
+        LoggedIn.monitorBtn.setText("MONITOR");
+        LoggedIn.monitorBtn.setEnabled(true);
+        SharedPreferences.Editor ed = LoggedIn.mPrefs.edit();
+        LoggedIn.isMonitoringEnabled=true;
+        ed.putBoolean("isMonitoringEnabled",true);
+        ed.apply();
+
         //after getting the data display it on the monitor page
     }
 }

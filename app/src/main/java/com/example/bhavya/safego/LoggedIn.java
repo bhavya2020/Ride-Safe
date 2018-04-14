@@ -1,6 +1,7 @@
 package com.example.bhavya.safego;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
@@ -30,6 +31,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -53,27 +55,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bhavya.safego.data.accelerometerContract;
-import com.example.bhavya.safego.data.accelerometerDbHelper;
-import com.example.bhavya.safego.data.gyroscopeContract;
-import com.example.bhavya.safego.data.gyroscopeDbHelper;
-import com.example.bhavya.safego.data.linearAccelerationContract;
-import com.example.bhavya.safego.data.linearAccelerationDbHelper;
-import com.example.bhavya.safego.data.magnetometerContract;
 import com.example.bhavya.safego.data.magnetometerDbHelper;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
+
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -96,13 +84,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     Boolean isMonitoring = false;
+    public static Boolean isMonitoringEnabled =true;
     Boolean isImageServiceStarted = false;
+    public static Button monitorBtn;
     private reportsAdapter mAdapter;
-    private GoogleMap mMap;
+
+    private monitorResultAdapter rAdapter;
     private driversAdapter dAdapter;
+    private RecyclerView resultView;
     private RecyclerView mRecyclerView;
     private RecyclerView driversView;
     private final static String ip = "192.168.43.170";
@@ -112,7 +104,7 @@ public class LoggedIn extends AppCompatActivity
     private String key;
     private GoogleSignInClient mGoogleSignInClient;
 
-    private SharedPreferences mPrefs;
+    public static SharedPreferences mPrefs;
 
     @Override
     protected void onStart() {
@@ -124,6 +116,12 @@ public class LoggedIn extends AppCompatActivity
         if (isMonitoring) {
             monitorBtn.setVisibility(View.GONE);
             stopMonitorBtn.setVisibility(View.VISIBLE);
+        }else if(!isMonitoringEnabled){
+            monitorBtn.setText("MONITORING...");
+            monitorBtn.setEnabled(false);
+        }else{
+            monitorBtn.setText("MONITOR");
+            monitorBtn.setEnabled(true);
         }
     }
 
@@ -145,6 +143,7 @@ public class LoggedIn extends AppCompatActivity
         super.onPause();
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean("isMonitoring", isMonitoring);
+        ed.putBoolean("isMonitoringEnabled",isMonitoringEnabled);
         ed.apply();
 
     }
@@ -183,6 +182,7 @@ public class LoggedIn extends AppCompatActivity
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         isImageServiceStarted = mPrefs.getBoolean("isImageServiceStarted", false);
         isMonitoring = mPrefs.getBoolean("isMonitoring", false);
+        isMonitoringEnabled=mPrefs.getBoolean("isMonitoringEnabled",true);
 
         if (checkSelfPermission(Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -223,7 +223,7 @@ public class LoggedIn extends AppCompatActivity
             new LoadProfilePic(profilePic).execute(String.valueOf(profileUrl));
         }
 
-        final Button monitorBtn = findViewById(R.id.monitorBtn);
+        monitorBtn = findViewById(R.id.monitorBtn);
         monitorBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -241,6 +241,12 @@ public class LoggedIn extends AppCompatActivity
         if (isMonitoring) {
             monitorBtn.setVisibility(View.GONE);
             stopMonitorBtn.setVisibility(View.VISIBLE);
+        }else if(!isMonitoringEnabled){
+            monitorBtn.setText("MONITORING...");
+            monitorBtn.setEnabled(false);
+        }else{
+            monitorBtn.setText("MONITOR");
+            monitorBtn.setEnabled(true);
         }
 
         TextView u2 = findViewById(R.id.username);
@@ -256,7 +262,6 @@ public class LoggedIn extends AppCompatActivity
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
         key = getKey();
-        //TODO: make it not image service started
         if (!isImageServiceStarted) {
             SharedPreferences.Editor ed = mPrefs.edit();
             ed.putBoolean("isImageServiceStarted", true);
@@ -598,11 +603,17 @@ public class LoggedIn extends AppCompatActivity
 
         if (id == R.id.monitor) {
             monitor.setVisibility(View.VISIBLE);
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
-            if (mapFragment != null)
-                mapFragment.getMapAsync(this);
-
+            try {
+                JSONArray monitorResults= getResults();
+                resultView = findViewById(R.id.monitorResults);
+                LinearLayoutManager layoutManager =
+                        new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                resultView.setLayoutManager(layoutManager);
+                rAdapter = new monitorResultAdapter(monitorResults, this);
+                resultView.setAdapter(rAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
         } else if (id == R.id.home) {
             home.setVisibility(View.VISIBLE);
@@ -733,8 +744,11 @@ public class LoggedIn extends AppCompatActivity
 
     private void clickStopMonitor(View view) {
         isMonitoring = false;
+        isMonitoringEnabled=false;
         Button Monitor = findViewById(R.id.monitorBtn);
         Monitor.setVisibility(View.VISIBLE);
+        Monitor.setEnabled(false);
+        Monitor.setText("MONITORING...");
         view.setVisibility(View.GONE);
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         stopService(service);
@@ -848,47 +862,8 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-    @Override
-    public void onMapReady(GoogleMap map) {
 
-        mMap = map;
-
-//        LatLng sydney = new LatLng(-33.867, 151.206);
-//
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        JSONArray result=null;
-        try {
-            result= getResults();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            showResult(result);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-//
-//        map.addMarker(new MarkerOptions()
-//                .title("Sydney")
-//                .snippet("The most populous city in Australia.")
-//                .position(sydney));
-
-
-    }
-
-
-    private JSONArray getResults() throws JSONException {
+    public JSONArray getResults() throws JSONException {
 
         final StringBuffer response = new StringBuffer();
         Thread thread = new Thread(new Runnable() {
@@ -924,88 +899,7 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-    private void showResult(JSONArray result) throws JSONException {
 
-
-        Marker start,end;
-        List<ColouredPoint> points=new ArrayList<>();
-        for(int i=0;i<result.length();i++)
-        {
-            JSONObject obj=result.getJSONObject(i);
-            LatLng lt = new LatLng(obj.getDouble("latitude"), obj.getDouble("longitude"));
-            if(i== 0) {
-                start=mMap.addMarker(new MarkerOptions()
-                .position(lt)
-                .title("start")
-                );
-                start.setTag(0);
-            }
-            if(i==result.length()-1)
-            {
-                end=mMap.addMarker(new MarkerOptions()
-                .position(lt)
-                .title("end"));
-                end.setTag(0);
-            }
-            ColouredPoint cp=new ColouredPoint(lt,getColour(obj.getInt("class")));
-
-            points.add(cp);
-        }
-
-        showPolyline(points);
-    }
-
-    private int getColour(int aClass) {
-
-        switch (aClass)
-        {
-            case 0: return Color.RED;
-            case 1: return Color.BLUE;
-            case 2: return Color.YELLOW;
-            case 3: return Color.GREEN;
-            case 4: return Color.MAGENTA;
-            default: return  Color.CYAN;
-        }
-    }
-
-    private void showPolyline(List<ColouredPoint> points) {
-
-        if (points.size() < 2)
-            return;
-
-        int ix = 0;
-        ColouredPoint currentPoint  = points.get(ix);
-        int currentColor = currentPoint.color;
-        List<LatLng> currentSegment = new ArrayList<>();
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPoint.coords,15));
-        currentSegment.add(currentPoint.coords);
-        ix++;
-
-        while (ix < points.size()) {
-            currentPoint = points.get(ix);
-
-            if (currentPoint.color == currentColor) {
-                currentSegment.add(currentPoint.coords);
-            } else {
-                currentSegment.add(currentPoint.coords);
-                mMap.addPolyline(new PolylineOptions()
-                        .addAll(currentSegment)
-                        .color(currentColor)
-                        .width(10));
-                currentColor = currentPoint.color;
-                currentSegment.clear();
-                currentSegment.add(currentPoint.coords);
-            }
-
-            ix++;
-        }
-
-        mMap.addPolyline(new PolylineOptions()
-                .addAll(currentSegment)
-                .color(currentColor)
-                .width(20));
-
-    }
 
 
 }
