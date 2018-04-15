@@ -75,16 +75,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static android.app.PendingIntent.getActivity;
 
 public class LoggedIn extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler {
@@ -95,8 +87,11 @@ public class LoggedIn extends AppCompatActivity
     public static Button monitorBtn;
     private reportsAdapter mAdapter;
 
+    private TextView TvCredits;
+    private Menu mMenu;
     private monitorResultAdapter rAdapter;
     private driversAdapter dAdapter;
+    private pieChartAdapter pAdapter;
     private RecyclerView resultView;
     private RecyclerView mRecyclerView;
     private RecyclerView driversView;
@@ -188,6 +183,7 @@ public class LoggedIn extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged_in);
         Log.i("create", "creating activity");
+        TvCredits=findViewById(R.id.tv_credits);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         isImageServiceStarted = mPrefs.getBoolean("isImageServiceStarted", false);
         isMonitoring = mPrefs.getBoolean("isMonitoring", false);
@@ -271,6 +267,7 @@ public class LoggedIn extends AppCompatActivity
             new LoadProfilePic(pic2).execute(String.valueOf(profileUrl));
         }
         key = getKey();
+
         if (!isImageServiceStarted) {
             SharedPreferences.Editor ed = mPrefs.edit();
             ed.putBoolean("isImageServiceStarted", true);
@@ -278,6 +275,28 @@ public class LoggedIn extends AppCompatActivity
             ed.apply();
             Intent service = new Intent(getBaseContext(), ImageService.class);
             startService(service);
+        }
+        try {
+           JSONArray arr= getReports();
+            mRecyclerView = findViewById(R.id.rv_reports_hz);
+            LinearLayoutManager layoutManager =
+                    new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            mRecyclerView.setLayoutManager(layoutManager);
+            mAdapter = new reportsAdapter(arr, this);
+            mRecyclerView.setAdapter(mAdapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            JSONArray arr= getResults();
+            mRecyclerView = findViewById(R.id.rv_monitor_result_pie_chart);
+            LinearLayoutManager layoutManager =
+                    new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            mRecyclerView.setLayoutManager(layoutManager);
+            pAdapter = new pieChartAdapter(arr, this);
+            mRecyclerView.setAdapter(pAdapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         TextView isUnder18 = findViewById(R.id.isUnder18);
         String IsUnder18 = isUnder18();
@@ -503,7 +522,13 @@ public class LoggedIn extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        mMenu=menu;
+
         getMenuInflater().inflate(R.menu.logged_in, menu);
+        MenuItem credits=menu.findItem(R.id.action_credits);
+        mPrefs=PreferenceManager.getDefaultSharedPreferences(this);
+        credits.setTitle("credits: "+mPrefs.getInt("credits",0));
+        TvCredits.setText(String.valueOf(mPrefs.getInt("credits",0)));
         return true;
     }
 
@@ -571,7 +596,33 @@ public class LoggedIn extends AppCompatActivity
             ClipData clip = ClipData.newPlainText("key", key);
             clipboard.setPrimaryClip(clip);
         }
+        if(id== R.id.action_refresh){
 
+            try {
+                JSONArray monitorResults= getResults();
+                int credits=0;
+                for (int i=0;i<monitorResults.length();i++){
+                    credits+=new JSONObject(monitorResults.getString(i)).getInt("credits");
+                }
+                TvCredits.setText(credits);
+                SharedPreferences.Editor ed = mPrefs.edit();
+                ed.putInt("credits", credits);
+                ed.apply();
+
+                MenuItem creditsIt=mMenu.findItem(R.id.action_credits);
+                creditsIt.setTitle("credits: "+credits);
+                resultView = findViewById(R.id.monitorResults);
+                LinearLayoutManager layoutManager =
+                        new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+                resultView.setLayoutManager(layoutManager);
+                resultView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+                rAdapter = new monitorResultAdapter(monitorResults, this,this);
+                resultView.setAdapter(rAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -614,6 +665,17 @@ public class LoggedIn extends AppCompatActivity
             monitor.setVisibility(View.VISIBLE);
             try {
                 JSONArray monitorResults= getResults();
+                int credits=0;
+                for (int i=0;i<monitorResults.length();i++){
+                    credits+=new JSONObject(monitorResults.getString(i)).getInt("credits");
+                }
+                SharedPreferences.Editor ed = mPrefs.edit();
+                ed.putInt("credits", credits);
+                ed.apply();
+
+                MenuItem creditsIt=mMenu.findItem(R.id.action_credits);
+                creditsIt.setTitle("credits: "+credits);
+                TvCredits.setText(String.valueOf(credits));
                 resultView = findViewById(R.id.monitorResults);
                 LinearLayoutManager layoutManager =
                         new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -644,7 +706,8 @@ public class LoggedIn extends AppCompatActivity
         } else if (id == R.id.reportAgainst) {
             reportAgainst.setVisibility(View.VISIBLE);
             try {
-                getReports();
+               JSONArray arr= getReports();
+                showReports(arr);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -700,7 +763,7 @@ public class LoggedIn extends AppCompatActivity
         driversView.setAdapter(dAdapter);
     }
 
-    private void getReports() throws JSONException {
+    private JSONArray getReports() throws JSONException {
         final StringBuffer response = new StringBuffer();
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -731,16 +794,16 @@ public class LoggedIn extends AppCompatActivity
         }
         JSONObject obj = new JSONObject(response.toString());
         JSONArray arr = obj.getJSONArray("reports");
-        for (int i = 0; i < arr.length(); i++) {
-            Log.i("reports" + i, String.valueOf(new JSONObject(arr.getString(i))));
-        }
+
+    return arr;
+    }
+    private void showReports(JSONArray arr){
         mRecyclerView = findViewById(R.id.rv_reports);
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mAdapter = new reportsAdapter(arr, this);
         mRecyclerView.setAdapter(mAdapter);
-
     }
 
     private void clickMonitor(View view) {

@@ -335,7 +335,6 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
         LoggedIn.isMonitoringEnabled=true;
         ed.putBoolean("isMonitoringEnabled",true);
         ed.apply();
-
         //after getting the data display it on the monitor page
     }
 }

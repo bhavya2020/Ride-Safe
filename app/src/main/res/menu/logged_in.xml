@@ -6,4 +6,14 @@
         android:orderInCategory="100"
         android:title="copy key"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_credits"
+        android:orderInCategory="1"
+        android:title="credits"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="2"
+        android:title="refresh"
+        app:showAsAction="collapseActionView" />
 </menu>

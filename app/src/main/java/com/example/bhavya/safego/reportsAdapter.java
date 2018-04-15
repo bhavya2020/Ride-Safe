@@ -26,6 +26,7 @@ public class reportsAdapter extends RecyclerView.Adapter<reportsAdapter.reportsA
         mContext=context;
     }
     @Override
+
     public reportsAdapter.reportsAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layoutId=R.layout.report;
         View view = LayoutInflater.from(mContext).inflate(layoutId, parent, false);
@@ -51,7 +52,7 @@ public class reportsAdapter extends RecyclerView.Adapter<reportsAdapter.reportsA
             {
                 c[i]=categories.getBoolean(i);
             }
-            time=report.getString("createdAt");
+            time=report.getString("createdAt").substring(0,10);
         } catch (JSONException e) {
             e.printStackTrace();
         }

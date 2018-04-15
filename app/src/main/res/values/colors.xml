@@ -8,4 +8,5 @@
     <color name="aggBreak">#0000ff</color>
     <color name="aggLeft">#00ff00</color>
     <color name="aggRight">#00ffff</color>
+    <color name="back">#d1f2eb</color>
 </resources>
