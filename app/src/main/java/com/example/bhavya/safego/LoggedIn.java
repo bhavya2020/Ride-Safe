@@ -62,6 +62,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -79,7 +81,7 @@ import java.net.URL;
 
 
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler {
+        implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler,GoogleApiClient.OnConnectionFailedListener {
 
     Boolean isMonitoring = false;
     public static Boolean isMonitoringEnabled =true;
@@ -281,8 +283,9 @@ public class LoggedIn extends AppCompatActivity
             mRecyclerView = findViewById(R.id.rv_reports_hz);
             LinearLayoutManager layoutManager =
                     new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+
             mRecyclerView.setLayoutManager(layoutManager);
-            mAdapter = new reportsAdapter(arr, this);
+            mAdapter = new reportsAdapter(arr, this,true);
             mRecyclerView.setAdapter(mAdapter);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -416,10 +419,10 @@ public class LoggedIn extends AppCompatActivity
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        ;
+
         String KEY = response.toString();
-        KEY = KEY.substring(1, KEY.length() - 1);
-        Log.i("key", response.toString());
+        if(KEY.length()>0)
+            KEY = KEY.substring(1, KEY.length() - 1);
         return KEY;
     }
 
@@ -604,7 +607,7 @@ public class LoggedIn extends AppCompatActivity
                 for (int i=0;i<monitorResults.length();i++){
                     credits+=new JSONObject(monitorResults.getString(i)).getInt("credits");
                 }
-                TvCredits.setText(credits);
+                TvCredits.setText(String.valueOf(credits));
                 SharedPreferences.Editor ed = mPrefs.edit();
                 ed.putInt("credits", credits);
                 ed.apply();
@@ -689,6 +692,29 @@ public class LoggedIn extends AppCompatActivity
 
         } else if (id == R.id.home) {
             home.setVisibility(View.VISIBLE);
+            try {
+                JSONArray arr= getReports();
+                mRecyclerView = findViewById(R.id.rv_reports_hz);
+                LinearLayoutManager layoutManager =
+                        new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+
+                mRecyclerView.setLayoutManager(layoutManager);
+                mAdapter = new reportsAdapter(arr, this,true);
+                mRecyclerView.setAdapter(mAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                JSONArray arr= getResults();
+                mRecyclerView = findViewById(R.id.rv_monitor_result_pie_chart);
+                LinearLayoutManager layoutManager =
+                        new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                mRecyclerView.setLayoutManager(layoutManager);
+                pAdapter = new pieChartAdapter(arr, this);
+                mRecyclerView.setAdapter(pAdapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (id == R.id.see) {
             addDriver.setVisibility(View.VISIBLE);
             try {
@@ -713,6 +739,11 @@ public class LoggedIn extends AppCompatActivity
             }
         } else if (id == R.id.profile) {
             profile.setVisibility(View.VISIBLE);
+            try {
+                setProfile();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (id == R.id.about) {
             about.setVisibility(View.VISIBLE);
         }
@@ -802,7 +833,7 @@ public class LoggedIn extends AppCompatActivity
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
-        mAdapter = new reportsAdapter(arr, this);
+        mAdapter = new reportsAdapter(arr, this,false);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -978,5 +1009,10 @@ public class LoggedIn extends AppCompatActivity
         intent.putExtra("trip", result.toString());
         intent.putExtra("tripDetails",tripDetails);
         startActivity(intent);
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Toast.makeText(this,"Connection-failed",Toast.LENGTH_LONG).show();
     }
 }

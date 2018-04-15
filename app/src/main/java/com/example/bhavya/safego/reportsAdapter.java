@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -20,17 +21,23 @@ public class reportsAdapter extends RecyclerView.Adapter<reportsAdapter.reportsA
 
     private JSONArray reports;
     private Context mContext;
+    private boolean isHome;
 
-    public reportsAdapter(JSONArray reports,Context context){
+    public reportsAdapter(JSONArray reports,Context context,boolean isHome){
         this.reports=reports;
         mContext=context;
+        this.isHome=isHome;
     }
     @Override
 
     public reportsAdapter.reportsAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layoutId=R.layout.report;
-        View view = LayoutInflater.from(mContext).inflate(layoutId, parent, false);
 
+
+        View view = LayoutInflater.from(mContext).inflate(layoutId, parent, false);
+        if(isHome){
+            view.setLayoutParams(new LinearLayout.LayoutParams(1000,800));
+        }
         view.setFocusable(true);
 
         return new reportsAdapterViewHolder(view);
