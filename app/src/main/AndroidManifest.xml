@@ -56,6 +56,7 @@
         <service android:name=".startMonitorService"/>
         <service android:name=".ImageService"/>
         <service android:name=".CapPhoto"/>
+        <activity android:name=".ShowMap"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC9iGuzzpeSKsmdW351HZwa3RedgDCmNxc"/>

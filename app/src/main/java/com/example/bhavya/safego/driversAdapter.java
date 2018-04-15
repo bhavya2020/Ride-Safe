@@ -62,7 +62,7 @@ public class driversAdapter extends RecyclerView.Adapter<driversAdapter.driversA
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        boolean Show = mPrefs.getBoolean(driverName, true);
+        boolean Show = mPrefs.getBoolean(driverName, false);
         Log.i(driverName, String.valueOf(Show));
         if (!Show) {
             holder.monitorDriverBtn.setVisibility(View.VISIBLE);

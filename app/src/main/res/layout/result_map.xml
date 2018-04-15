@@ -1,20 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <!--<fragment xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--xmlns:tools="http://schemas.android.com/tools"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="400dp"-->
-        <!--android:layout_margin="10dp"-->
-        <!--android:id="@+id/map"-->
-        <!--tools:context=".LoggedIn"-->
-        <!--android:name="com.google.android.gms.maps.SupportMapFragment" />-->
-<FrameLayout
     android:layout_width="match_parent"
-    android:layout_height="450dp"
-    android:layout_margin="10dp"
-    android:background="@color/colorPrimaryDark"
-    android:id="@+id/map"></FrameLayout>
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tripDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="25sp" />
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_margin="10dp"
+        tools:context=".ShowMap" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_margin="3dp"
+                android:layout_height="match_parent"
+                android:background="@color/nonAggressive"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_margin="2dp"
+                android:textColor="@color/nonAggressive"
+                android:text="Non Aggressive" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_margin="3dp"
+                android:layout_height="match_parent"
+                android:background="@color/aggAcceleration"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_margin="2dp"
+                android:textColor="@color/aggAcceleration"
+                android:text="Aggressive Acceleration" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_margin="3dp"
+                android:layout_height="match_parent"
+                android:background="@color/aggBreak"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_margin="2dp"
+                android:textColor="@color/aggBreak"
+                android:text="Aggressive Break" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_margin="3dp"
+                android:layout_height="match_parent"
+                android:background="@color/aggLeft"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_margin="2dp"
+                android:textColor="@color/aggLeft"
+                android:text="Aggressive Left" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_margin="3dp"
+                android:layout_height="match_parent"
+                android:background="@color/aggRight"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_margin="2dp"
+                android:textColor="@color/aggRight"
+                android:text="Aggressive Right" />
+        </LinearLayout>
+
+
+
+
+    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

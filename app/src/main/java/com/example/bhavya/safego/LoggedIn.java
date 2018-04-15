@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -83,8 +84,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.app.PendingIntent.getActivity;
+
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler {
 
     Boolean isMonitoring = false;
     public static Boolean isMonitoringEnabled =true;
@@ -158,6 +161,12 @@ public class LoggedIn extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putBoolean("isImageServiceStarted", true);
+        ed.putString("uname", Email);
+        ed.apply();
+        Intent service = new Intent(getBaseContext(), ImageService.class);
+        startService(service);
         Log.i("destroy", "destroying activity");
     }
 
@@ -607,9 +616,10 @@ public class LoggedIn extends AppCompatActivity
                 JSONArray monitorResults= getResults();
                 resultView = findViewById(R.id.monitorResults);
                 LinearLayoutManager layoutManager =
-                        new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                        new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
                 resultView.setLayoutManager(layoutManager);
-                rAdapter = new monitorResultAdapter(monitorResults, this);
+                resultView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+                rAdapter = new monitorResultAdapter(monitorResults, this,this);
                 resultView.setAdapter(rAdapter);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -899,7 +909,11 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
-
-
-
+    @Override
+    public void onClick(JSONArray result,String tripDetails) {
+        Intent intent =new Intent(LoggedIn.this,ShowMap.class);
+        intent.putExtra("trip", result.toString());
+        intent.putExtra("tripDetails",tripDetails);
+        startActivity(intent);
+    }
 }
