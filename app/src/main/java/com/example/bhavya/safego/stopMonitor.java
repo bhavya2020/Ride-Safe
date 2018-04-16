@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.example.bhavya.safego.data.accelerometerContract;
@@ -328,11 +329,16 @@ public class stopMonitor extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+        if(s!=null)
         Log.i("stop-monitor-result", s);
-        LoggedIn.monitorBtn.setText("MONITOR");
-        LoggedIn.monitorBtn.setEnabled(true);
-        SharedPreferences.Editor ed = LoggedIn.mPrefs.edit();
-        LoggedIn.isMonitoringEnabled=true;
+        if(LoggedIn.monitorBtn!=null) {
+            LoggedIn.monitorBtn.setText("MONITOR");
+            LoggedIn.monitorBtn.setEnabled(true);
+            LoggedIn.isMonitoringEnabled=true;
+        }
+        SharedPreferences mPrefs= PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = mPrefs.edit();
+
         ed.putBoolean("isMonitoringEnabled",true);
         ed.apply();
         //after getting the data display it on the monitor page

@@ -15,7 +15,13 @@
         android:visibility="visible"
         android:textColor="@android:color/background_light"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="245dp"
-        android:layout_marginLeft="129dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        android:layout_marginTop="248dp"
+        android:layout_marginLeft="107dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.176"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintVertical_bias="0.107" />
 </android.support.constraint.ConstraintLayout>

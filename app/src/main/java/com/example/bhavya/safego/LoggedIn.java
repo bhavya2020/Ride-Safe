@@ -11,8 +11,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -33,6 +36,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,6 +53,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -57,6 +63,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.bhavya.safego.data.magnetometerDbHelper;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.LegendEntry;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -78,6 +95,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 
 public class LoggedIn extends AppCompatActivity
@@ -159,11 +177,11 @@ public class LoggedIn extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean("isImageServiceStarted", true);
+        ed.putBoolean("isImageServiceStarted",false );
         ed.putString("uname", Email);
         ed.apply();
         Intent service = new Intent(getBaseContext(), ImageService.class);
-        startService(service);
+        stopService(service);
         Log.i("destroy", "destroying activity");
     }
 
@@ -292,6 +310,60 @@ public class LoggedIn extends AppCompatActivity
         }
         try {
             JSONArray arr= getResults();
+            LineChart lineChart =findViewById(R.id.LineChart);
+            Legend legend=lineChart.getLegend();
+            LegendEntry legendEntry[]=new  LegendEntry[1];
+            legendEntry[0]=new LegendEntry();
+            legendEntry[0].label="% good driving";
+            legend.setExtra(legendEntry);
+            lineChart.setDescription(null);
+            YAxis left = lineChart.getAxisLeft();
+            left.setDrawLabels(false);
+            left.setDrawAxisLine(true);
+            left.setAxisLineColor(Color.BLACK);
+            left.setAxisLineWidth(2);
+            left.setDrawZeroLine(false);
+            left.setDrawGridLines(false);
+            left.setAxisMinimum(0);
+            lineChart.getAxisRight().setEnabled(false);
+            XAxis x=lineChart.getXAxis();
+
+            x.setDrawGridLines(false);
+            x.setPosition(XAxis.XAxisPosition.BOTTOM);
+            x.setAxisLineColor(Color.BLACK);
+            x.setAxisLineWidth(2);
+            x.setTextSize(15f);
+            x.setTextColor(Color.BLACK);
+
+
+
+            ArrayList<Entry> yvalues = new ArrayList<>();
+
+            int noOfTrips= (arr.length()<10)? arr.length() : 10;
+
+            for(int i=0;i<noOfTrips;i++){
+
+                JSONObject newResult=new JSONObject(arr.getString(i));
+                JSONArray trip=newResult.getJSONArray("trip");
+
+                int nonagg=0;
+                for(int j=0;j<trip.length();j++){
+                    JSONObject tripInstance =new JSONObject(trip.getString(j));
+                    if(tripInstance.getInt("class")==4)
+                        nonagg++;
+                }
+
+                yvalues.add(new Entry(i+1,(float)nonagg/trip.length()*100));
+            }
+
+            LineDataSet dataSet=new LineDataSet(yvalues,"");
+            dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+            dataSet.setDrawFilled(true);
+            dataSet.setFillAlpha(1000);
+            dataSet.setValueTextSize(15f);
+            dataSet.setColor(Color.BLUE);
+            LineData data=new LineData(dataSet);
+            lineChart.setData(data);
             mRecyclerView = findViewById(R.id.rv_monitor_result_pie_chart);
             LinearLayoutManager layoutManager =
                     new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -694,6 +766,7 @@ public class LoggedIn extends AppCompatActivity
             home.setVisibility(View.VISIBLE);
             try {
                 JSONArray arr= getReports();
+
                 mRecyclerView = findViewById(R.id.rv_reports_hz);
                 LinearLayoutManager layoutManager =
                         new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -706,6 +779,60 @@ public class LoggedIn extends AppCompatActivity
             }
             try {
                 JSONArray arr= getResults();
+                LineChart lineChart =findViewById(R.id.LineChart);
+                Legend legend=lineChart.getLegend();
+                LegendEntry legendEntry[]=new  LegendEntry[1];
+                legendEntry[0]=new LegendEntry();
+                legendEntry[0].label="% good driving";
+                legend.setExtra(legendEntry);
+                lineChart.setDescription(null);
+                YAxis left = lineChart.getAxisLeft();
+                left.setDrawLabels(false);
+                left.setDrawAxisLine(true);
+                left.setAxisLineColor(Color.BLACK);
+                left.setAxisLineWidth(2);
+                left.setDrawZeroLine(false);
+                left.setDrawGridLines(false);
+                left.setAxisMinimum(0);
+                lineChart.getAxisRight().setEnabled(false);
+                XAxis x=lineChart.getXAxis();
+
+                x.setDrawGridLines(false);
+                x.setPosition(XAxis.XAxisPosition.BOTTOM);
+                x.setAxisLineColor(Color.BLACK);
+                x.setAxisLineWidth(2);
+                x.setTextSize(15f);
+                x.setTextColor(Color.BLACK);
+
+
+
+                ArrayList<Entry> yvalues = new ArrayList<>();
+
+                int noOfTrips= (arr.length()<10)? arr.length() : 10;
+
+                for(int i=0;i<noOfTrips;i++){
+
+                    JSONObject newResult=new JSONObject(arr.getString(i));
+                    JSONArray trip=newResult.getJSONArray("trip");
+
+                    int nonagg=0;
+                    for(int j=0;j<trip.length();j++){
+                        JSONObject tripInstance =new JSONObject(trip.getString(j));
+                        if(tripInstance.getInt("class")==4)
+                            nonagg++;
+                    }
+
+                    yvalues.add(new Entry(i+1,(float)nonagg/trip.length()*100));
+                }
+
+                LineDataSet dataSet=new LineDataSet(yvalues,"");
+                dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+                dataSet.setDrawFilled(true);
+                dataSet.setFillAlpha(1000);
+                dataSet.setValueTextSize(15f);
+                dataSet.setColor(Color.BLUE);
+                LineData data=new LineData(dataSet);
+                lineChart.setData(data);
                 mRecyclerView = findViewById(R.id.rv_monitor_result_pie_chart);
                 LinearLayoutManager layoutManager =
                         new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -842,6 +969,10 @@ public class LoggedIn extends AppCompatActivity
         Button stopMonitor = findViewById(R.id.StopMonitorBtn);
         stopMonitor.setVisibility(View.VISIBLE);
         view.setVisibility(View.GONE);
+        NotificationCompat.Builder mBuilder=Notify();
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        notificationManager.notify(2002, mBuilder.build());
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         startService(service);
     }
@@ -856,6 +987,9 @@ public class LoggedIn extends AppCompatActivity
         view.setVisibility(View.GONE);
         Intent service = new Intent(getBaseContext(), startMonitorService.class);
         stopService(service);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        notificationManager.cancel(2002);
         new stopMonitor(Email, this).execute();
     }
 
@@ -1015,4 +1149,36 @@ public class LoggedIn extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Toast.makeText(this,"Connection-failed",Toast.LENGTH_LONG).show();
     }
+
+    private NotificationCompat.Builder Notify(){
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        return new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(largeIcon(this))
+                .setContentTitle("MONITOR")
+                .setContentText("you are being monitored")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .addAction(stopMonitorAction(this))
+                .setAutoCancel(false);
+
+
+    }
+    private NotificationCompat.Action stopMonitorAction(Context context){
+
+        Intent intentAction=new Intent(context,notificationReceiver.class);
+        intentAction.putExtra("email",Email);
+        PendingIntent p= PendingIntent.getBroadcast(context,1,intentAction,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new NotificationCompat.Action(0,"STOP MONITOR",p);
+    }
+    private static Bitmap largeIcon(Context context) {
+        Resources res = context.getResources();
+        Bitmap largeIcon = BitmapFactory.decodeResource(res,R.drawable.logo);
+        return largeIcon;
+    }
+
 }
