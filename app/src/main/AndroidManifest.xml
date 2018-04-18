@@ -51,8 +51,9 @@
             android:name=".LoggedIn"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".LoggedOut">
-            </activity>
+        <activity android:name=".LoggedOut"/>
+        <activity android:name=".driverOffences"/>
+        <activity android:name=".driverOffenceImages"/>
         <service android:name=".startMonitorService"/>
         <service android:name=".ImageService"/>
         <service android:name=".CapPhoto"/>

@@ -100,13 +100,6 @@ public class ImageService extends Service {
                             }
                         }
                     });
-                    socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            Log.i("disconnect",email);
-                            socket.emit("disconnect",email);
-                        }
-                    });
                     socket.connect();
 
                 } catch (URISyntaxException e) {

@@ -99,7 +99,7 @@ import java.util.ArrayList;
 
 
 public class LoggedIn extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler,GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, monitorResultAdapter.monitorResultAdapterOnClickHandler,GoogleApiClient.OnConnectionFailedListener, distractionResultAdapter.distractionOnClickListener {
 
     Boolean isMonitoring = false;
     public static Boolean isMonitoringEnabled =true;
@@ -851,7 +851,16 @@ public class LoggedIn extends AppCompatActivity
             }
         } else if (id == R.id.distraction) {
             distraction.setVisibility(View.VISIBLE);
-
+            try {
+                JSONArray arr=getDistractionResults();
+                RecyclerView result_rv=findViewById(R.id.rv_distraction_result);
+                LinearLayoutManager layoutManager=new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+                result_rv.setLayoutManager(layoutManager);
+                distractionResultAdapter adapter=new distractionResultAdapter(arr,this,this);
+                result_rv.setAdapter(adapter);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
 
         } else if (id == R.id.report) {
@@ -1137,6 +1146,42 @@ public class LoggedIn extends AppCompatActivity
 
     }
 
+    public JSONArray getDistractionResults() throws JSONException {
+
+        final StringBuffer response = new StringBuffer();
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL("http://" + ip + ":" + port + "/all/distractionResult/" + Email);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.getResponseCode();
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        JSONObject obj = new JSONObject(response.toString());
+
+        return obj.getJSONArray("driverOffence");
+
+    }
+
     @Override
     public void onClick(JSONArray result,String tripDetails) {
         Intent intent =new Intent(LoggedIn.this,ShowMap.class);
@@ -1181,4 +1226,10 @@ public class LoggedIn extends AppCompatActivity
         return largeIcon;
     }
 
+    @Override
+    public void onDriverClick(String driverName) {
+        Intent intent=new Intent(this,driverOffences.class);
+        intent.putExtra("driverName",driverName);
+        startActivity(intent);
+    }
 }
