@@ -8,32 +8,32 @@
 
         <item
             android:id="@+id/about"
-            android:title="about safeGo" />
+            android:title="Help" />
         <item
             android:id="@+id/profile"
-            android:title="your profile" />
+            android:title="Your Profile" />
     </group>
     <group android:checkableBehavior="single">
 
         <item
             android:id="@+id/monitor"
-            android:title="monitor" />
+            android:title="Monitor" />
         <item
             android:id="@+id/report"
-            android:title="report" />
+            android:title="Report" />
         <item
             android:id="@+id/reportAgainst"
-            android:title="reports against you" />
+            android:title="Reports Against You" />
     </group>
 
-    <item android:title="fleet manager">
+    <item android:title="Manage Drivers">
         <menu>
             <item
                 android:id="@+id/see"
-                android:title="add driver" />
+                android:title="Your Drivers" />
             <item
                 android:id="@+id/distraction"
-                android:title="driver distractions" />
+                android:title="Driver Offences" />
         </menu>
     </item>
 

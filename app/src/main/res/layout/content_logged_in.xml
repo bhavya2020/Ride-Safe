@@ -258,7 +258,7 @@
                         android:layout_height="wrap_content"
                         android:labelFor="@+id/DLno"
                         android:padding="10dp"
-                        android:text="DLno:"
+                        android:text="DL No:"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
@@ -285,7 +285,7 @@
                         android:layout_height="wrap_content"
                         android:labelFor="@+id/numPlate"
                         android:padding="10dp"
-                        android:text="number plate:"
+                        android:text="Number Plate:"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
@@ -312,7 +312,7 @@
                         android:layout_height="wrap_content"
                         android:labelFor="@+id/gender"
                         android:padding="10dp"
-                        android:text="gender:"
+                        android:text="Gender:"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
@@ -339,7 +339,7 @@
                         android:layout_height="wrap_content"
                         android:labelFor="@+id/phoneno"
                         android:padding="10dp"
-                        android:text="phone no:"
+                        android:text="Phone No:"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
@@ -366,7 +366,7 @@
                         android:layout_height="wrap_content"
                         android:labelFor="@+id/age"
                         android:padding="10dp"
-                        android:text="age:"
+                        android:text="Age:"
                         android:textColor="@color/colorPrimary"
                         android:textSize="20sp" />
 
@@ -471,7 +471,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="10dp"
-                android:text="your drivers offences"
+                android:text="Your Drivers Offences"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="30sp" />
 

@@ -89,11 +89,11 @@ public class pieChartAdapter extends RecyclerView.Adapter<pieChartAdapter.pieCha
 
     private String getClassName(int i){
         switch (i){
-            case 0: return "aggressive acceleration";
-            case 1: return "aggressive break";
-            case 2: return "aggressive right";
-            case 3: return "aggressive left";
-            case 4: return "non aggressive";
+            case 0: return "Aggressive Acceleration";
+            case 1: return "Aggressive Break";
+            case 2: return "Aggressive Right";
+            case 3: return "Aggressive Left";
+            case 4: return "Non Aggressive";
             default:return "invalid";
         }
     }
